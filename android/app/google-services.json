@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "199533370788",
+    "project_id": "authsync-34f3c",
+    "storage_bucket": "authsync-34f3c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:199533370788:android:ce0f97e26626c54c88f531",
+        "android_client_info": {
+          "package_name": "com.example.authsync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA8WACcBKF0fngEJ5-L4F7r2i2HO3faII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
