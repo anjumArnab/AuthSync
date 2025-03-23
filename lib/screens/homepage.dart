@@ -1,3 +1,4 @@
+import 'package:authsync/screens/create_account_page.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:authsync/widgets/icon_container.dart';
@@ -16,6 +17,16 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPassController = TextEditingController();
   bool _isPasswordVisible = false;
+
+  void _navToCreateAccountPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateAccountPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,32 +106,33 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                IconContainer(imagePath:'assets/google.jpg'),
-                const SizedBox(width: 10),
-                IconContainer(imagePath:'assets/facebook.jpg'),
-              ],),
+                  IconContainer(imagePath: 'assets/google.jpg'),
+                  const SizedBox(width: 10),
+                  IconContainer(imagePath: 'assets/facebook.jpg'),
+                ],
+              ),
             ),
             const SizedBox(height: 10),
-          RichText(
-                  text: TextSpan(
-                    style: const TextStyle(color: Colors.blue),
-                    children: [
-                      const TextSpan(
-                        text: "Don't have an account? ",
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      TextSpan(
-                          text: 'Sign Up',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            color: Colors.purple,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap =
-                                () {}),
-                    ],
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(color: Colors.blue),
+                children: [
+                  const TextSpan(
+                    text: "Don't have an account? ",
+                    style: TextStyle(color: Colors.black),
                   ),
-                ),
+                  TextSpan(
+                    text: 'Sign Up',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Colors.purple,
+                    ),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () => _navToCreateAccountPage(context),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
