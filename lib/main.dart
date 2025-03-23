@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'AuthSync',
       theme: ThemeData(
           textTheme: GoogleFonts.poppinsTextTheme()
@@ -20,4 +21,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
