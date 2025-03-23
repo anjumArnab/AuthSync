@@ -1,3 +1,3 @@
 # authsync
 
-A new Flutter project.
+Flutter project for user authentication and cloud firestore.
