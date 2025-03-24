@@ -1,3 +1,6 @@
+import 'package:authsync/screens/homepage.dart';
+import 'package:authsync/services/authentication.dart';
+import 'package:authsync/utils/snack_bar.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +25,9 @@ class _UserInfoFormState extends State<UserInfoForm> {
   final TextEditingController _college = TextEditingController();
   final TextEditingController _undergradInstitution = TextEditingController();
 
+  // Initialize the auth service
+  final FirebaseAuthService _authService = FirebaseAuthService();
+
   @override
   void dispose() {
     _fullname.dispose();
@@ -38,11 +44,40 @@ class _UserInfoFormState extends State<UserInfoForm> {
     super.dispose();
   }
 
+  void _navToHomePage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
+  }
+
+  void _logout() async {
+    bool success = await _authService.signOut(context);
+
+    if (success) {
+      showSnackBar(context, 'Successfully logged out.');
+
+      if (mounted) {
+        _navToHomePage(context);
+      }
+    } else {
+      showSnackBar(context, 'Logout failed. Please try again.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AuthSync'),
+        actions: [
+          IconButton(
+              icon: const Icon(Icons.logout_outlined),
+              onPressed: () => _logout()),
+          const SizedBox(width: 15),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -55,7 +90,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
-              
+
               // Personal Information Section
               const Text(
                 'Personal Information',
@@ -63,7 +98,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               ),
               const Divider(),
               const SizedBox(height: 10),
-              
+
               const Text('Full Name'),
               CustomTextField(
                 controller: _fullname,
@@ -71,7 +106,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Gender'),
               CustomTextField(
                 controller: _gender,
@@ -79,7 +114,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Date of Birth'),
               CustomTextField(
                 controller: _dob,
@@ -87,7 +122,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.datetime,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Blood Group'),
               CustomTextField(
                 controller: _bloodGroup,
@@ -95,7 +130,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Preferred Language'),
               CustomTextField(
                 controller: _language,
@@ -103,7 +138,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 20),
-              
+
               // Contact Information Section
               const Text(
                 'Contact Information',
@@ -111,7 +146,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               ),
               const Divider(),
               const SizedBox(height: 10),
-              
+
               const Text('Phone Number'),
               CustomTextField(
                 controller: _phone,
@@ -119,7 +154,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.phone,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Emergency Contact'),
               CustomTextField(
                 controller: _emergencyContact,
@@ -127,7 +162,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Mailing Address'),
               CustomTextField(
                 controller: _mailingAddress,
@@ -136,7 +171,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 //maxLines: 3,
               ),
               const SizedBox(height: 20),
-              
+
               // Educational Background Section
               const Text(
                 'Educational Background',
@@ -144,7 +179,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               ),
               const Divider(),
               const SizedBox(height: 10),
-              
+
               const Text('High School'),
               CustomTextField(
                 controller: _highSchool,
@@ -152,7 +187,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('College'),
               CustomTextField(
                 controller: _college,
@@ -160,7 +195,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Undergraduate Institution'),
               CustomTextField(
                 controller: _undergradInstitution,
@@ -168,7 +203,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 30),
-              
+
               // Submit Button
               CustomButton(text: 'Submit', onPressed: () {}),
               const SizedBox(height: 20),
