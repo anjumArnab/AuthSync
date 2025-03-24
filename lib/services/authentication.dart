@@ -103,6 +103,17 @@ class FirebaseAuthService {
     }
   }
 
+  Future<void> sendPasswordResetEmail(String email, BuildContext context) async {
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    showSnackBar(context, 'Password reset email sent. Check your inbox.');
+  } on FirebaseAuthException catch (e) {
+    showSnackBar(context, _getAuthErrorMessage(e));
+  } catch (e) {
+    showSnackBar(context, 'An unexpected error occurred.');
+  }
+}
+
   /// Re-authenticates the current user using their email and password.
   /// 
   /// Returns true if successful, false otherwise.
