@@ -1,4 +1,5 @@
 import 'package:authsync/screens/homepage.dart';
+import 'package:authsync/services/authentication.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:authsync/widgets/icon_container.dart';
@@ -16,6 +17,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+
+  // Initialize the auth service
+  final FirebaseAuthService _authService = FirebaseAuthService();
 
   void _navToHomePage(BuildContext context) {
     Navigator.push(
@@ -24,6 +29,60 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         builder: (context) => const HomePage(),
       ),
     );
+  }
+
+  // Function to handle sign up
+  Future<void> _signUp() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text.trim();
+
+      // Validate inputs
+      if (email.isEmpty || password.isEmpty) {
+        // Use the snackbar directly for input validation
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email and password cannot be empty')),
+        );
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Create user with Firebase Auth - service now handles snackbar display
+      final userCredential = await _authService.createUser(
+        email: email,
+        password: password,
+        context: context,
+      );
+
+      if (userCredential != null) {
+        // Send email verification - service now handles snackbar display
+        final emailSent = await _authService.sendEmailVerification(context);
+
+        if (emailSent && mounted) {
+          _navToHomePage(context);
+        }
+      }
+    } catch (e) {
+      // This catch block will handle any non-FirebaseAuthException errors
+      // that weren't caught in the service
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -51,7 +110,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
             CustomTextField(
                 controller: _emailController,
                 hintText: 'youremail@mail.com',
-                keyboardType: TextInputType.text),
+                keyboardType: TextInputType.emailAddress),
             const SizedBox(height: 10),
             const Align(
               alignment: Alignment.centerLeft,
@@ -73,7 +132,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 keyboardType: TextInputType.text),
             const SizedBox(height: 10),
-            CustomButton(text: 'Sign Up', onPressed: () {}),
+            CustomButton(
+              text: _isLoading ? 'Creating Account...' : 'Sign Up',
+              onPressed: _isLoading
+                  ? null
+                  : () async {
+                      await _signUp();
+                    },
+            ),
             const SizedBox(height: 10),
             Align(
               alignment: Alignment.center,
@@ -111,5 +177,12 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }
