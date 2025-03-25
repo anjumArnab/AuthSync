@@ -4,9 +4,9 @@ class UserInfoPage extends StatelessWidget {
   //final UserModel user;
 
   const UserInfoPage({
-    Key? key,
+    super.key,
     //required this.user,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
