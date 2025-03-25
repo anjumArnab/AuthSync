@@ -1,5 +1,6 @@
 class UserModel {
-  final String? id;
+  final String uid;
+  final String email;
   final String fullName;
   final String gender;
   final String dateOfBirth;
@@ -13,7 +14,8 @@ class UserModel {
   final String undergradInstitution;
   
   UserModel({
-    this.id,
+    required this.uid,
+    required this.email,
     required this.fullName,
     required this.gender,
     required this.dateOfBirth,
@@ -30,7 +32,8 @@ class UserModel {
   // Convert UserModel to Map for database operations or API calls
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      'uid': uid,
+      'email' : email,
       'fullName': fullName,
       'gender': gender,
       'dateOfBirth': dateOfBirth,
@@ -48,7 +51,8 @@ class UserModel {
   // Create UserModel from Map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'],
+      uid: map['uid'],
+      email: map['email'],
       fullName: map['fullName'] ?? '',
       gender: map['gender'] ?? '',
       dateOfBirth: map['dateOfBirth'] ?? '',
@@ -67,7 +71,7 @@ class UserModel {
   // For debugging and logging purposes
   @override
   String toString() {
-    return 'UserModel(id: $id, fullName: $fullName, gender: $gender, dateOfBirth: $dateOfBirth, bloodGroup: $bloodGroup, '
+    return 'UserModel(uid: $uid, fullName: $fullName, gender: $gender, dateOfBirth: $dateOfBirth, bloodGroup: $bloodGroup, '
         'preferredLanguage: $preferredLanguage, phoneNumber: $phoneNumber, emergencyContact: $emergencyContact, '
         'mailingAddress: $mailingAddress, highSchool: $highSchool, college: $college, undergradInstitution: $undergradInstitution)';
   }
