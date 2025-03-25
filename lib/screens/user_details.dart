@@ -1,12 +1,57 @@
+import 'package:authsync/screens/homepage.dart';
+import 'package:authsync/screens/reset_password_page.dart';
+import 'package:authsync/services/authentication.dart';
+import 'package:authsync/utils/snack_bar.dart';
+import 'package:authsync/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 
-class UserInfoPage extends StatelessWidget {
+class UserDetailsPage extends StatefulWidget {
   //final UserModel user;
 
-  const UserInfoPage({
+  const UserDetailsPage({
     super.key,
     //required this.user,
   });
+
+  @override
+  State<UserDetailsPage> createState() => _UserDetailsPageState();
+}
+
+class _UserDetailsPageState extends State<UserDetailsPage> {
+  // You can add state variables here if needed
+  // For example:
+  // bool _isEditing = false;
+
+  // Initialize the auth service
+  final FirebaseAuthService _authService = FirebaseAuthService();
+
+  void _navToHomePage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomePage(),
+      ),
+    );
+  }
+
+  void _navToResetPassword(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ResetPasswordPage(),
+      ),
+    );
+  }
+
+  void _deleteAccount() async {
+    bool success = await _authService.deleteUser(context);
+    if (success) {
+      showSnackBar(context, 'Account deleted successfully.');
+      _navToHomePage(context);
+    } else {
+      showSnackBar(context, 'Failed to delete account. Please try again.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +89,7 @@ class UserInfoPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      // user.fullName,
+                      // widget.user.fullName,
                       'Sakib Anjum Arnab',
                       style: const TextStyle(
                         fontSize: 24,
@@ -53,7 +98,7 @@ class UserInfoPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      //user.phoneNumber,
+                      //widget.user.phoneNumber,
                       '+8801818447232',
                       style: TextStyle(
                         fontSize: 16,
@@ -88,6 +133,13 @@ class UserInfoPage extends StatelessWidget {
               _buildInfoRow(
                   'Undergraduate Institution', 'user.undergradInstitution'),
               const SizedBox(height: 24),
+              CustomButton(
+                  text: "Change Password",
+                  onPressed: () => _navToResetPassword(context)),
+              const SizedBox(height: 15),
+              CustomButton(
+                  text: "Delete Account", onPressed: () => _deleteAccount()),
+              const SizedBox(height: 30),
             ],
           ),
         ),
