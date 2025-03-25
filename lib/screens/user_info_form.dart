@@ -89,8 +89,8 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 'Please enter your information',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
+              Text('for ${_authService.currentUser!.email}'),
               const SizedBox(height: 20),
-
               // Personal Information Section
               const Text(
                 'Personal Information',
