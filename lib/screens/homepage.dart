@@ -2,6 +2,7 @@ import 'package:authsync/screens/create_account_page.dart';
 import 'package:authsync/screens/forget_password_page.dart';
 import 'package:authsync/screens/user_info_form.dart';
 import 'package:authsync/services/authentication.dart';
+import 'package:authsync/utils/snack_bar.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:authsync/widgets/icon_container.dart';
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _navToforgetPassword(BuildContext context){
+  void _navToforgetPassword(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -63,9 +64,7 @@ class _HomePageState extends State<HomePage> {
       // Validate inputs
       if (email.isEmpty || password.isEmpty) {
         // Use the snackbar directly for input validation
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email and password cannot be empty')),
-        );
+        showSnackBar(context, 'Email and password cannot be empty');
         setState(() {
           _isLoading = false;
         });
@@ -90,10 +89,7 @@ class _HomePageState extends State<HomePage> {
 
           if (emailSent && mounted) {
             // Show a message that verification email was sent
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Please verify your email before continuing')),
-            );
+            showSnackBar(context, 'Please verify your email before continuing');
 
             // You could still navigate to a verification reminder screen
             // or stay on the current screen
@@ -104,9 +100,7 @@ class _HomePageState extends State<HomePage> {
       // This catch block will handle any non-FirebaseAuthException errors
       // that weren't caught in the service
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        showSnackBar(context, 'Error: ${e.toString()}');
       }
     } finally {
       if (mounted) {
@@ -166,7 +160,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
             const SizedBox(height: 10),
             GestureDetector(
-              onTap:  () => _navToforgetPassword(context),
+              onTap: () => _navToforgetPassword(context),
               child: const Align(
                 alignment: Alignment.centerRight,
                 child: Text('Forget Password?'),
