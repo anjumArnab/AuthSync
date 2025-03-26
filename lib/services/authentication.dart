@@ -61,14 +61,32 @@ class FirebaseAuthService {
   ///
   /// Returns true if successful, false otherwise.
   /// User must have recently authenticated to perform this action.
-  Future<bool> updateEmail(String newEmail, BuildContext context) async {
+  Future<bool> updateEmail(
+      String newEmail, password, BuildContext context) async {
     try {
       final user = _auth.currentUser;
       if (user == null) {
         showSnackBar(context, 'No user is currently signed in');
         return false;
       }
-      await user.updateEmail(newEmail);
+
+      final email = user.email;
+      if (email == null) {
+        showSnackBar(context, 'Unable to retrieve user email');
+        return false;
+      }
+      bool reauthenticated = await reauthenticateUser(
+        email: email,
+        password: password,
+        context: context,
+      );
+
+      // If re-authentication fails, return false
+      if (!reauthenticated) {
+        showSnackBar(context, 'Current password is incorrect');
+        return false;
+      }
+      await user.verifyBeforeUpdateEmail(newEmail);
       showSnackBar(context, 'Email updated successfully');
       return true;
     } on FirebaseAuthException catch (e) {
