@@ -1,3 +1,4 @@
+import 'package:authsync/screens/change_email_page.dart';
 import 'package:authsync/screens/homepage.dart';
 import 'package:authsync/screens/reset_password_page.dart';
 import 'package:authsync/services/authentication.dart';
@@ -43,6 +44,15 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     );
   }
 
+  void _navToChangeEmail(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ChangeEmailPage(),
+      ),
+    );
+  }
+
   void _deleteAccount() async {
     bool success = await _authService.deleteUser(context);
     if (success) {
@@ -50,6 +60,20 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       _navToHomePage(context);
     } else {
       showSnackBar(context, 'Failed to delete account. Please try again.');
+    }
+  }
+
+    void _logout() async {
+    bool success = await _authService.signOut(context);
+
+    if (success) {
+      showSnackBar(context, 'Successfully logged out.');
+
+      if (mounted) {
+        _navToHomePage(context);
+      }
+    } else {
+      showSnackBar(context, 'Logout failed. Please try again.');
     }
   }
 
@@ -66,6 +90,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
               // Navigator.push(context, MaterialPageRoute(builder: (context) => UserInfoForm(user: user)));
             },
           ),
+        IconButton(
+              icon: const Icon(Icons.logout_outlined),
+              onPressed: () => _logout()),
+          const SizedBox(width: 15),
         ],
       ),
       body: SingleChildScrollView(
@@ -133,6 +161,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
               _buildInfoRow(
                   'Undergraduate Institution', 'user.undergradInstitution'),
               const SizedBox(height: 24),
+              CustomButton(
+                  text: "Change Email",
+                  onPressed: () => _navToChangeEmail(context)),
+              const SizedBox(height: 15),
               CustomButton(
                   text: "Change Password",
                   onPressed: () => _navToResetPassword(context)),
