@@ -90,6 +90,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
               // Navigator.push(context, MaterialPageRoute(builder: (context) => UserInfoForm(user: user)));
             },
           ),
+          const SizedBox(width:10),
         IconButton(
               icon: const Icon(Icons.logout_outlined),
               onPressed: () => _logout()),

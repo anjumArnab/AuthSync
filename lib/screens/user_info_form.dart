@@ -1,6 +1,6 @@
 import 'package:authsync/screens/homepage.dart';
+import 'package:authsync/screens/user_details.dart';
 import 'package:authsync/services/authentication.dart';
-import 'package:authsync/utils/snack_bar.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
@@ -53,20 +53,15 @@ class _UserInfoFormState extends State<UserInfoForm> {
     );
   }
 
-  void _logout() async {
-    bool success = await _authService.signOut(context);
-
-    if (success) {
-      showSnackBar(context, 'Successfully logged out.');
-
-      if (mounted) {
-        _navToHomePage(context);
-      }
-    } else {
-      showSnackBar(context, 'Logout failed. Please try again.');
-    }
+ void _navTotest(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const UserDetailsPage(),
+      ),
+    );
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -74,9 +69,10 @@ class _UserInfoFormState extends State<UserInfoForm> {
         title: const Text('AuthSync'),
         actions: [
           IconButton(
-              icon: const Icon(Icons.logout_outlined),
-              onPressed: () => _logout()),
-          const SizedBox(width: 15),
+            icon: const Icon(Icons.info_outline),
+            onPressed: () => _navTotest(context)
+          ),
+          const SizedBox(width: 15)
         ],
       ),
       body: Padding(
