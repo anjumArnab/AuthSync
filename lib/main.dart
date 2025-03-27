@@ -1,4 +1,6 @@
 import 'package:authsync/firebase_options.dart';
+import 'package:authsync/screens/user_details.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:authsync/screens/homepage.dart';
@@ -18,10 +20,29 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AuthSync',
-      theme: ThemeData(
-          textTheme: GoogleFonts.poppinsTextTheme()
-        ),
-      home: HomePage(),
+      theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
+      home: const AuthCheck(),
+    );
+  }
+}
+
+class AuthCheck extends StatelessWidget {
+  const AuthCheck({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasData) {
+          return UserDetailsPage(); // User is logged in
+        } else {
+          return HomePage(); // User is not logged in
+        }
+      },
     );
   }
 }
