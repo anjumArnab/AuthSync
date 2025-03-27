@@ -1,6 +1,7 @@
 import 'package:authsync/screens/change_email_page.dart';
 import 'package:authsync/screens/homepage.dart';
 import 'package:authsync/screens/reset_password_page.dart';
+import 'package:authsync/screens/user_info_form.dart';
 import 'package:authsync/services/authentication.dart';
 import 'package:authsync/utils/snack_bar.dart';
 import 'package:authsync/widgets/custom_button.dart';
@@ -31,6 +32,15 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
       context,
       MaterialPageRoute(
         builder: (context) => const HomePage(),
+      ),
+    );
+  }
+
+    void _navToUserInfo(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const UserInfoForm(),
       ),
     );
   }
@@ -85,10 +95,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Navigate to edit page
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => UserInfoForm(user: user)));
-            },
+            onPressed: () => _navToUserInfo(context),
           ),
           const SizedBox(width:10),
         IconButton(
@@ -117,10 +124,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
+                    const Text(
                       // widget.user.fullName,
                       'Sakib Anjum Arnab',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
