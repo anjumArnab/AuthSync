@@ -1,6 +1,7 @@
-import 'package:authsync/screens/homepage.dart';
+import 'package:authsync/models/user.dart';
 import 'package:authsync/screens/user_details.dart';
 import 'package:authsync/services/authentication.dart';
+import 'package:authsync/services/database.dart';
 import 'package:authsync/widgets/custom_button.dart';
 import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
@@ -25,8 +26,72 @@ class _UserInfoFormState extends State<UserInfoForm> {
   final TextEditingController _college = TextEditingController();
   final TextEditingController _undergradInstitution = TextEditingController();
 
-  // Initialize the auth service
   final FirebaseAuthService _authService = FirebaseAuthService();
+  late DatabaseService _databaseService;
+
+  @override
+  void initState() {
+    super.initState();
+    _databaseService = DatabaseService(uid: _authService.currentUser!.uid);
+    _loadUserData();
+  }
+
+  void _navToUserDetailsPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const UserDetailsPage(),
+      ),
+    );
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      UserModel? user = await _databaseService.getUserData();
+      if (user != null) {
+        setState(() {
+          _fullname.text = user.fullName;
+          _gender.text = user.gender;
+          _dob.text = user.dateOfBirth;
+          _bloodGroup.text = user.bloodGroup;
+          _language.text = user.preferredLanguage;
+          _phone.text = user.phoneNumber;
+          _emergencyContact.text = user.emergencyContact;
+          _mailingAddress.text = user.mailingAddress;
+          _highSchool.text = user.highSchool;
+          _college.text = user.college;
+          _undergradInstitution.text = user.undergradInstitution;
+        });
+      }
+    } catch (e) {
+      print("Error loading user data: $e");
+    }
+  }
+
+  Future<void> _saveUserData() async {
+    try {
+      UserModel user = UserModel(
+        uid: _authService.currentUser!.uid,
+        email: _authService.currentUser!.email!,
+        fullName: _fullname.text,
+        gender: _gender.text,
+        dateOfBirth: _dob.text,
+        bloodGroup: _bloodGroup.text,
+        preferredLanguage: _language.text,
+        phoneNumber: _phone.text,
+        emergencyContact: _emergencyContact.text,
+        mailingAddress: _mailingAddress.text,
+        highSchool: _highSchool.text,
+        college: _college.text,
+        undergradInstitution: _undergradInstitution.text,
+      );
+
+      await _databaseService.saveUserData(user);
+      _navToUserDetailsPage(context); // Go back to user details page
+    } catch (e) {
+      print("Error saving user data: $e");
+    }
+  }
 
   @override
   void dispose() {
@@ -44,36 +109,11 @@ class _UserInfoFormState extends State<UserInfoForm> {
     super.dispose();
   }
 
-  void _navToHomePage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomePage(),
-      ),
-    );
-  }
-
- void _navTotest(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const UserDetailsPage(),
-      ),
-    );
-  }
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AuthSync'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () => _navTotest(context)
-          ),
-          const SizedBox(width: 15)
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -164,7 +204,6 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 controller: _mailingAddress,
                 hintText: 'Enter your complete address',
                 keyboardType: TextInputType.streetAddress,
-                //maxLines: 3,
               ),
               const SizedBox(height: 20),
 
@@ -201,7 +240,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               const SizedBox(height: 30),
 
               // Submit Button
-              CustomButton(text: 'Submit', onPressed: () {}),
+              CustomButton(text: 'Submit', onPressed: _saveUserData),
               const SizedBox(height: 20),
             ],
           ),
