@@ -15,16 +15,22 @@ class UserInfoForm extends StatefulWidget {
 
 class _UserInfoFormState extends State<UserInfoForm> {
   final TextEditingController _fullname = TextEditingController();
-  final TextEditingController _gender = TextEditingController();
   final TextEditingController _dob = TextEditingController();
-  final TextEditingController _bloodGroup = TextEditingController();
-  final TextEditingController _language = TextEditingController();
   final TextEditingController _phone = TextEditingController();
   final TextEditingController _emergencyContact = TextEditingController();
   final TextEditingController _mailingAddress = TextEditingController();
   final TextEditingController _highSchool = TextEditingController();
   final TextEditingController _college = TextEditingController();
   final TextEditingController _undergradInstitution = TextEditingController();
+  
+  // Define static lists for dropdown items
+  static const List<String> genderOptions = ['Male', 'Female', 'Other'];
+  static const List<String> bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
+  static const List<String> languageOptions = ['Bengali', 'English', 'Japanese'];
+
+  String? _selectedGender;
+  String? _selectedBloodGroup;
+  String? _selectedLanguage;
 
   final FirebaseAuthService _authService = FirebaseAuthService();
   late DatabaseService _databaseService;
@@ -34,6 +40,20 @@ class _UserInfoFormState extends State<UserInfoForm> {
     super.initState();
     _databaseService = DatabaseService(uid: _authService.currentUser!.uid);
     _loadUserData();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        _dob.text = "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+      });
+    }
   }
 
   void _navToUserDetailsPage(BuildContext context) {
@@ -51,10 +71,11 @@ class _UserInfoFormState extends State<UserInfoForm> {
       if (user != null) {
         setState(() {
           _fullname.text = user.fullName;
-          _gender.text = user.gender;
+          // Ensure the loaded values are in the predefined lists
+          _selectedGender = genderOptions.contains(user.gender) ? user.gender : null;
           _dob.text = user.dateOfBirth;
-          _bloodGroup.text = user.bloodGroup;
-          _language.text = user.preferredLanguage;
+          _selectedBloodGroup = bloodGroupOptions.contains(user.bloodGroup) ? user.bloodGroup : null;
+          _selectedLanguage = languageOptions.contains(user.preferredLanguage) ? user.preferredLanguage : null;
           _phone.text = user.phoneNumber;
           _emergencyContact.text = user.emergencyContact;
           _mailingAddress.text = user.mailingAddress;
@@ -69,15 +90,31 @@ class _UserInfoFormState extends State<UserInfoForm> {
   }
 
   Future<void> _saveUserData() async {
+    // Add validation to ensure all required dropdowns are selected
+    if (_selectedGender == null || _selectedBloodGroup == null || _selectedLanguage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select all dropdown values')),
+      );
+      return;
+    }
+
+    // Validate required text fields
+    if (_fullname.text.isEmpty || _dob.text.isEmpty || _phone.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all required fields')),
+      );
+      return;
+    }
+
     try {
       UserModel user = UserModel(
         uid: _authService.currentUser!.uid,
         email: _authService.currentUser!.email!,
         fullName: _fullname.text,
-        gender: _gender.text,
+        gender: _selectedGender!,
         dateOfBirth: _dob.text,
-        bloodGroup: _bloodGroup.text,
-        preferredLanguage: _language.text,
+        bloodGroup: _selectedBloodGroup!,
+        preferredLanguage: _selectedLanguage!,
         phoneNumber: _phone.text,
         emergencyContact: _emergencyContact.text,
         mailingAddress: _mailingAddress.text,
@@ -96,10 +133,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
   @override
   void dispose() {
     _fullname.dispose();
-    _gender.dispose();
     _dob.dispose();
-    _bloodGroup.dispose();
-    _language.dispose();
     _phone.dispose();
     _emergencyContact.dispose();
     _mailingAddress.dispose();
@@ -107,6 +141,26 @@ class _UserInfoFormState extends State<UserInfoForm> {
     _college.dispose();
     _undergradInstitution.dispose();
     super.dispose();
+  }
+
+  // Helper method to create dropdown buttons with consistent styling
+  Widget _buildDropdownButton<T>({
+    required List<T> items,
+    required T? value,
+    required void Function(T?) onChanged,
+    required String hint,
+  }) {
+    return DropdownButton<T>(
+      value: value,
+      hint: Text(hint),
+      items: items.map((T value) {
+        return DropdownMenuItem<T>(
+          value: value,
+          child: Text(value.toString()),
+        );
+      }).toList(),
+      onChanged: onChanged,
+    );
   }
 
   @override
@@ -127,6 +181,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               ),
               Text('for ${_authService.currentUser!.email}'),
               const SizedBox(height: 20),
+              
               // Personal Information Section
               const Text(
                 'Personal Information',
@@ -135,44 +190,87 @@ class _UserInfoFormState extends State<UserInfoForm> {
               const Divider(),
               const SizedBox(height: 10),
 
-              const Text('Full Name'),
+              const Text('Full Name *'),
               CustomTextField(
                 controller: _fullname,
                 hintText: 'Enter your full name',
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-
-              const Text('Gender'),
-              CustomTextField(
-                controller: _gender,
-                hintText: 'Enter your gender',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('Date of Birth'),
-              CustomTextField(
+              
+              const Text('Date of Birth *'),
+              TextField(
                 controller: _dob,
-                hintText: 'DD/MM/YYYY',
-                keyboardType: TextInputType.datetime,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  hintText: 'DD/MM/YYYY',
+                  border: OutlineInputBorder(),
+                ),
+                onTap: () => _selectDate(context),
               ),
               const SizedBox(height: 15),
-
-              const Text('Blood Group'),
-              CustomTextField(
-                controller: _bloodGroup,
-                hintText: 'E.g., A+, B-, O+',
-                keyboardType: TextInputType.text,
+              
+              // Dropdown Row
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  // Gender Dropdown
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Gender *'),
+                      _buildDropdownButton<String>(
+                        items: genderOptions,
+                        value: _selectedGender,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedGender = newValue;
+                          });
+                        },
+                        hint: 'Select Gender',
+                      ),
+                    ],
+                  ),
+                  
+                  // Blood Group Dropdown
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Blood Group *'),
+                      _buildDropdownButton<String>(
+                        items: bloodGroupOptions,
+                        value: _selectedBloodGroup,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedBloodGroup = newValue;
+                          });
+                        },
+                        hint: 'Select Blood Group',
+                      ),
+                    ],
+                  ),
+                  
+                  // Language Dropdown
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Language *'),
+                      _buildDropdownButton<String>(
+                        items: languageOptions,
+                        value: _selectedLanguage,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedLanguage = newValue;
+                          });
+                        },
+                        hint: 'Select Language',
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              const SizedBox(height: 15),
 
-              const Text('Preferred Language'),
-              CustomTextField(
-                controller: _language,
-                hintText: 'Enter your preferred language',
-                keyboardType: TextInputType.text,
-              ),
               const SizedBox(height: 20),
 
               // Contact Information Section
@@ -183,7 +281,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               const Divider(),
               const SizedBox(height: 10),
 
-              const Text('Phone Number'),
+              const Text('Phone Number *'),
               CustomTextField(
                 controller: _phone,
                 hintText: 'Enter your phone number',
@@ -240,7 +338,10 @@ class _UserInfoFormState extends State<UserInfoForm> {
               const SizedBox(height: 30),
 
               // Submit Button
-              CustomButton(text: 'Submit', onPressed: _saveUserData),
+              CustomButton(
+                text: _fullname.text.isEmpty ? 'Submit' : 'Update', 
+                onPressed: _saveUserData
+              ),
               const SizedBox(height: 20),
             ],
           ),
