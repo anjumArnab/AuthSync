@@ -157,23 +157,33 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                       _buildInfoRow('Gender', _userData!.gender),
                       _buildInfoRow('Date of Birth', _userData!.dateOfBirth),
                       _buildInfoRow('Blood Group', _userData!.bloodGroup),
-                      _buildInfoRow('Preferred Language', _userData!.preferredLanguage),
+                      _buildInfoRow(
+                          'Preferred Language', _userData!.preferredLanguage),
                       const SizedBox(height: 24),
                       _buildSectionHeader('Contact Information'),
                       _buildInfoRow('Phone Number', _userData!.phoneNumber),
-                      _buildInfoRow('Emergency Contact', _userData!.emergencyContact),
-                      _buildInfoRow('Mailing Address', _userData!.mailingAddress),
+                      _buildInfoRow(
+                          'Emergency Contact', _userData!.emergencyContact),
+                      _buildInfoRow(
+                          'Mailing Address', _userData!.mailingAddress),
                       const SizedBox(height: 24),
                       _buildSectionHeader('Educational Background'),
                       _buildInfoRow('High School', _userData!.highSchool),
                       _buildInfoRow('College', _userData!.college),
-                      _buildInfoRow('Undergraduate Institution', _userData!.undergradInstitution),
+                      _buildInfoRow('Undergraduate Institution',
+                          _userData!.undergradInstitution),
                       const SizedBox(height: 24),
-                      CustomButton(text: "Change Email", onPressed: () => _navToChangeEmail(context)),
+                      CustomButton(
+                          text: "Change Email",
+                          onPressed: () => _navToChangeEmail(context)),
                       const SizedBox(height: 15),
-                      CustomButton(text: "Change Password", onPressed: () => _navToResetPassword(context)),
+                      CustomButton(
+                          text: "Change Password",
+                          onPressed: () => _navToResetPassword(context)),
                       const SizedBox(height: 15),
-                      CustomButton(text: "Delete Account", onPressed: () => _deleteAccount()),
+                      CustomButton(
+                          text: "Delete Account",
+                          onPressed: () => _deleteAccount()),
                       const SizedBox(height: 30),
                     ],
                   ),
@@ -203,7 +213,10 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
         children: [
           Text(
             label,
-            style: TextStyle(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+            style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 4),
           Text(
