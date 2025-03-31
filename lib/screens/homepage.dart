@@ -37,15 +37,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _navToUserInfoForm(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => UserInfoForm(userData: _userData!),
-      ),
-    );
+    if (_userData != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserInfoForm(userData: _userData!),
+        ),
+      );
+    } else {
+      showSnackBar(context, 'User data is not available.');
+    }
   }
 
-  void _navToforgetPassword(BuildContext context) {
+  void _navToForgetPassword(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -65,7 +69,6 @@ class _HomePageState extends State<HomePage> {
 
       // Validate inputs
       if (email.isEmpty || password.isEmpty) {
-        // Use the snackbar directly for input validation
         showSnackBar(context, 'Email and password cannot be empty');
         setState(() {
           _isLoading = false;
@@ -74,42 +77,33 @@ class _HomePageState extends State<HomePage> {
       }
 
       final userCredential = await _authService.signInWithEmailAndPassword(
-          email: email, password: password, context: context);
+        email: email,
+        password: password,
+        context: context,
+      );
 
-      if (userCredential != null && userCredential.user != null) {
-        // Force refresh the user info to get the latest verification status
-        await userCredential.user!.reload();
+      if (userCredential?.user == null) {
+        showSnackBar(context, 'Sign-in failed. Please try again.');
+        return;
+      }
 
-        if (userCredential.user!.emailVerified) {
-          // Email is already verified, navigate to user info form
-          if (mounted) {
-            _navToUserInfoForm(context);
-          }
-        } else {
-          // Email is not verified, send verification email
-          final emailSent = await _authService.sendEmailVerification(context);
+      // Refresh user to get updated verification status
+      await userCredential!.user!.reload();
 
-          if (emailSent && mounted) {
-            // Show a message that verification email was sent
-            showSnackBar(context, 'Please verify your email before continuing');
-
-            // You could still navigate to a verification reminder screen
-            // or stay on the current screen
-          }
+      if (userCredential.user!.emailVerified) {
+        _navToUserInfoForm(context);
+      } else {
+        final emailSent = await _authService.sendEmailVerification(context);
+        if (emailSent) {
+          showSnackBar(context, 'Please verify your email before continuing.');
         }
       }
     } catch (e) {
-      // This catch block will handle any non-FirebaseAuthException errors
-      // that weren't caught in the service
-      if (mounted) {
-        showSnackBar(context, 'Error: ${e.toString()}');
-      }
+      showSnackBar(context, 'Error: ${e.toString()}');
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -136,33 +130,34 @@ class _HomePageState extends State<HomePage> {
               child: Text('Email'),
             ),
             CustomTextField(
-                controller: _emailController,
-                hintText: 'youremail@mail.com',
-                keyboardType: TextInputType.text),
+              controller: _emailController,
+              hintText: 'youremail@mail.com',
+              keyboardType: TextInputType.text,
+            ),
             const SizedBox(height: 10),
             const Align(
               alignment: Alignment.centerLeft,
               child: Text('Password'),
             ),
             CustomTextField(
-                controller: _passwordController,
-                hintText: 'Password',
-                obsecureText: !_isPasswordVisible,
-                suffixIcon: IconButton(
-                  icon: Icon(_isPasswordVisible
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                ),
-                keyboardType: TextInputType.text),
-            const SizedBox(height: 10),
+              controller: _passwordController,
+              hintText: 'Password',
+              obsecureText: !_isPasswordVisible,
+              suffixIcon: IconButton(
+                icon: Icon(_isPasswordVisible
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined),
+                onPressed: () {
+                  setState(() {
+                    _isPasswordVisible = !_isPasswordVisible;
+                  });
+                },
+              ),
+              keyboardType: TextInputType.text,
+            ),
             const SizedBox(height: 10),
             GestureDetector(
-              onTap: () => _navToforgetPassword(context),
+              onTap: () => _navToForgetPassword(context),
               child: const Align(
                 alignment: Alignment.centerRight,
                 child: Text('Forget Password?'),
@@ -171,11 +166,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
             CustomButton(
               text: _isLoading ? 'Logging in...' : 'Log in',
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      await _signIn();
-                    },
+              onPressed: _isLoading ? null : _signIn,
             ),
             const SizedBox(height: 10),
             Align(

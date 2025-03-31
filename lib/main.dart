@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'AuthSync',
       theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
-      home: const AuthCheck(),
+      home: HomePage(),
     );
   }
 }
@@ -35,12 +35,14 @@ class AuthCheck extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         }
-        if (snapshot.hasData) {
+        if (snapshot.hasData && snapshot.data != null) {
           return UserDetailsPage(); // User is logged in
         } else {
-          return HomePage(); // User is not logged in
+          return const HomePage(); // User is not logged in
         }
       },
     );
