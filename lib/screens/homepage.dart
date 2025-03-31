@@ -1,3 +1,4 @@
+import 'package:authsync/models/user.dart';
 import 'package:authsync/screens/create_account_page.dart';
 import 'package:authsync/screens/forget_password_page.dart';
 import 'package:authsync/screens/user_info_form.dart';
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 } 
 
 class _HomePageState extends State<HomePage> {
+  UserModel? _userData;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -38,7 +40,7 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const UserInfoForm(),
+        builder: (context) => UserInfoForm(userData: _userData!),
       ),
     );
   }
