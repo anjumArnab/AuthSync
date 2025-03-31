@@ -7,7 +7,8 @@ import 'package:authsync/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 
 class UserInfoForm extends StatefulWidget {
-  const UserInfoForm({super.key});
+  final UserModel userData; // Accept user data from UserDetailsPage
+  const UserInfoForm({super.key, required this.userData});
 
   @override
   State<UserInfoForm> createState() => _UserInfoFormState();
@@ -22,11 +23,24 @@ class _UserInfoFormState extends State<UserInfoForm> {
   final TextEditingController _highSchool = TextEditingController();
   final TextEditingController _college = TextEditingController();
   final TextEditingController _undergradInstitution = TextEditingController();
-  
+
   // Define static lists for dropdown items
   static const List<String> genderOptions = ['Male', 'Female', 'Other'];
-  static const List<String> bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-  static const List<String> languageOptions = ['Bengali', 'English', 'Japanese'];
+  static const List<String> bloodGroupOptions = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'O+',
+    'O-',
+    'AB+',
+    'AB-'
+  ];
+  static const List<String> languageOptions = [
+    'Bengali',
+    'English',
+    'Japanese'
+  ];
 
   String? _selectedGender;
   String? _selectedBloodGroup;
@@ -72,10 +86,15 @@ class _UserInfoFormState extends State<UserInfoForm> {
         setState(() {
           _fullname.text = user.fullName;
           // Ensure the loaded values are in the predefined lists
-          _selectedGender = genderOptions.contains(user.gender) ? user.gender : null;
+          _selectedGender =
+              genderOptions.contains(user.gender) ? user.gender : null;
           _dob.text = user.dateOfBirth;
-          _selectedBloodGroup = bloodGroupOptions.contains(user.bloodGroup) ? user.bloodGroup : null;
-          _selectedLanguage = languageOptions.contains(user.preferredLanguage) ? user.preferredLanguage : null;
+          _selectedBloodGroup = bloodGroupOptions.contains(user.bloodGroup)
+              ? user.bloodGroup
+              : null;
+          _selectedLanguage = languageOptions.contains(user.preferredLanguage)
+              ? user.preferredLanguage
+              : null;
           _phone.text = user.phoneNumber;
           _emergencyContact.text = user.emergencyContact;
           _mailingAddress.text = user.mailingAddress;
@@ -91,7 +110,9 @@ class _UserInfoFormState extends State<UserInfoForm> {
 
   Future<void> _saveUserData() async {
     // Add validation to ensure all required dropdowns are selected
-    if (_selectedGender == null || _selectedBloodGroup == null || _selectedLanguage == null) {
+    if (_selectedGender == null ||
+        _selectedBloodGroup == null ||
+        _selectedLanguage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select all dropdown values')),
       );
@@ -181,7 +202,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
               ),
               Text('for ${_authService.currentUser!.email}'),
               const SizedBox(height: 20),
-              
+
               // Personal Information Section
               const Text(
                 'Personal Information',
@@ -197,7 +218,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 keyboardType: TextInputType.text,
               ),
               const SizedBox(height: 15),
-              
+
               const Text('Date of Birth *'),
               TextField(
                 controller: _dob,
@@ -209,7 +230,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                 onTap: () => _selectDate(context),
               ),
               const SizedBox(height: 15),
-              
+
               // Dropdown Row
               Wrap(
                 spacing: 10,
@@ -232,7 +253,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                       ),
                     ],
                   ),
-                  
+
                   // Blood Group Dropdown
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,7 +271,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
                       ),
                     ],
                   ),
-                  
+
                   // Language Dropdown
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,9 +360,8 @@ class _UserInfoFormState extends State<UserInfoForm> {
 
               // Submit Button
               CustomButton(
-                text: _fullname.text.isEmpty ? 'Submit' : 'Update', 
-                onPressed: _saveUserData
-              ),
+                  text: _fullname.text.isEmpty ? 'Submit' : 'Update',
+                  onPressed: _saveUserData),
               const SizedBox(height: 20),
             ],
           ),
