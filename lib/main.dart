@@ -20,10 +20,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AuthSync',
-      theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
+      theme: ThemeData(
+        textTheme: GoogleFonts.poppinsTextTheme(),
+      ),
       home: const AuthCheck(),
     );
-  } 
+  }
 }
 
 class AuthCheck extends StatelessWidget {
