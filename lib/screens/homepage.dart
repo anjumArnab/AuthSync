@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  UserModel? _userData;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -37,16 +36,29 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _navToUserInfoForm(BuildContext context) {
-    if (_userData != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserInfoForm(userData: _userData!),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UserInfoForm(
+          userData: UserModel(
+            uid: _authService.currentUser!.uid,
+            email: _authService.currentUser!.email!,
+            // Set default values for required fields
+            fullName: '',
+            gender: '',
+            dateOfBirth: '',
+            bloodGroup: '',
+            preferredLanguage: '',
+            phoneNumber: '',
+            emergencyContact: '',
+            mailingAddress: '',
+            highSchool: '',
+            college: '',
+            undergradInstitution: '',
+          ),
         ),
-      );
-    } else {
-      showSnackBar(context, 'User data is not available.');
-    }
+      ),
+    );
   }
 
   void _navToForgetPassword(BuildContext context) {
@@ -89,7 +101,6 @@ class _HomePageState extends State<HomePage> {
 
       // Refresh user to get updated verification status
       await userCredential!.user!.reload();
-
       if (userCredential.user!.emailVerified) {
         _navToUserInfoForm(context);
       } else {
