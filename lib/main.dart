@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'AuthSync',
       theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
-      home: HomePage(),
+      home: const AuthCheck(),
     );
   } 
 }
