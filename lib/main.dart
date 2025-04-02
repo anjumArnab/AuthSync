@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(textTheme: GoogleFonts.poppinsTextTheme()),
       home: HomePage(),
     );
-  }
+  } 
 }
 
 class AuthCheck extends StatelessWidget {
@@ -40,7 +40,7 @@ class AuthCheck extends StatelessWidget {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
-          return UserDetailsPage(); // User is logged in
+          return const UserDetailsPage(); // User is logged in
         } else {
           return const HomePage(); // User is not logged in
         }
