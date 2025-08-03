@@ -1,19 +1,19 @@
-import 'package:authsync/firebase_options.dart';
-import 'package:authsync/screens/user_details.dart';
+import '../firebase_options.dart';
+import '../screens/user_details.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:authsync/screens/homepage.dart';
+import '../screens/homepage.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(const AuthSync());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AuthSync extends StatelessWidget {
+  const AuthSync({super.key});
 
   @override
   Widget build(BuildContext context) {

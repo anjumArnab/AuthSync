@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class IconContainer extends StatelessWidget {
   final String imagePath;
 
-  IconContainer({required this.imagePath});
+  const IconContainer({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
