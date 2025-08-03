@@ -49,6 +49,10 @@ class _UserInfoFormState extends State<UserInfoForm> {
   final FirebaseAuthService _authService = FirebaseAuthService();
   late DatabaseService _databaseService;
 
+  // Step controller
+  int _currentStep = 0;
+  final PageController _pageController = PageController();
+
   @override
   void initState() {
     super.initState();
@@ -108,22 +112,71 @@ class _UserInfoFormState extends State<UserInfoForm> {
     }
   }
 
-  Future<void> _saveUserData() async {
-    // Add validation to ensure all required dropdowns are selected
-    if (_selectedGender == null ||
+  // Validation methods for each step
+  bool _validatePersonalInfo() {
+    if (_fullname.text.isEmpty ||
+        _dob.text.isEmpty ||
+        _selectedGender == null ||
         _selectedBloodGroup == null ||
         _selectedLanguage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select all dropdown values')),
+        const SnackBar(
+            content: Text(
+                'Please fill in all required personal information fields')),
       );
+      return false;
+    }
+    return true;
+  }
+
+  bool _validateContactInfo() {
+    if (_phone.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in the phone number')),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  // Navigate to next step
+  void _nextStep() {
+    if (_currentStep == 0 && !_validatePersonalInfo()) {
+      return;
+    }
+    if (_currentStep == 1 && !_validateContactInfo()) {
       return;
     }
 
-    // Validate required text fields
-    if (_fullname.text.isEmpty || _dob.text.isEmpty || _phone.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields')),
+    if (_currentStep < 2) {
+      setState(() {
+        _currentStep++;
+      });
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
+    }
+  }
+
+  // Navigate to previous step
+  void _previousStep() {
+    if (_currentStep > 0) {
+      setState(() {
+        _currentStep--;
+      });
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  Future<void> _saveUserData() async {
+    // Final validation
+    if (!_validatePersonalInfo() || !_validateContactInfo()) {
       return;
     }
 
@@ -161,6 +214,7 @@ class _UserInfoFormState extends State<UserInfoForm> {
     _highSchool.dispose();
     _college.dispose();
     _undergradInstitution.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -184,187 +238,305 @@ class _UserInfoFormState extends State<UserInfoForm> {
     );
   }
 
+  // Step indicator widget
+  Widget _buildStepIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i < 3; i++)
+          Row(
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: i <= _currentStep ? Colors.blue : Colors.grey[300],
+                ),
+                child: Center(
+                  child: Text(
+                    '${i + 1}',
+                    style: TextStyle(
+                      color:
+                          i <= _currentStep ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              if (i < 2)
+                Container(
+                  width: 40,
+                  height: 2,
+                  color: i < _currentStep ? Colors.blue : Colors.grey[300],
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  // Personal Information Step
+  Widget _buildPersonalInfoStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Personal Information',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Please provide your personal details',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const Divider(),
+        const SizedBox(height: 20),
+
+        const Text('Full Name *'),
+        CustomTextField(
+          controller: _fullname,
+          hintText: 'Enter your full name',
+          keyboardType: TextInputType.text,
+        ),
+        const SizedBox(height: 15),
+
+        const Text('Date of Birth *'),
+        TextField(
+          controller: _dob,
+          readOnly: true,
+          decoration: const InputDecoration(
+            hintText: 'DD/MM/YYYY',
+            border: OutlineInputBorder(),
+          ),
+          onTap: () => _selectDate(context),
+        ),
+        const SizedBox(height: 15),
+
+        // Dropdown Row
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            // Gender Dropdown
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Gender *'),
+                _buildDropdownButton<String>(
+                  items: genderOptions,
+                  value: _selectedGender,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedGender = newValue;
+                    });
+                  },
+                  hint: 'Select Gender',
+                ),
+              ],
+            ),
+
+            // Blood Group Dropdown
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Blood Group *'),
+                _buildDropdownButton<String>(
+                  items: bloodGroupOptions,
+                  value: _selectedBloodGroup,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedBloodGroup = newValue;
+                    });
+                  },
+                  hint: 'Select Blood Group',
+                ),
+              ],
+            ),
+
+            // Language Dropdown
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Language *'),
+                _buildDropdownButton<String>(
+                  items: languageOptions,
+                  value: _selectedLanguage,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedLanguage = newValue;
+                    });
+                  },
+                  hint: 'Select Language',
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 30),
+
+        CustomButton(
+          text: 'Next: Contact Information',
+          onPressed: _nextStep,
+        ),
+      ],
+    );
+  }
+
+  // Contact Information Step
+  Widget _buildContactInfoStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Contact Information',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Please provide your contact details',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const Divider(),
+        const SizedBox(height: 20),
+        const Text('Phone Number *'),
+        CustomTextField(
+          controller: _phone,
+          hintText: 'Enter your phone number',
+          keyboardType: TextInputType.phone,
+        ),
+        const SizedBox(height: 15),
+        const Text('Emergency Contact'),
+        CustomTextField(
+          controller: _emergencyContact,
+          hintText: 'Name and phone number',
+          keyboardType: TextInputType.text,
+        ),
+        const SizedBox(height: 15),
+        const Text('Mailing Address'),
+        CustomTextField(
+          controller: _mailingAddress,
+          hintText: 'Enter your complete address',
+          keyboardType: TextInputType.streetAddress,
+        ),
+        const SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: CustomButton(
+                text: 'Previous',
+                onPressed: _previousStep,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: CustomButton(
+                text: 'Next: Education',
+                onPressed: _nextStep,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // Educational Information Step
+  Widget _buildEducationalInfoStep() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Educational Background',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          'Please provide your educational background',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        const Divider(),
+        const SizedBox(height: 20),
+        const Text('High School'),
+        CustomTextField(
+          controller: _highSchool,
+          hintText: 'Enter your high school name',
+          keyboardType: TextInputType.text,
+        ),
+        const SizedBox(height: 15),
+        const Text('College'),
+        CustomTextField(
+          controller: _college,
+          hintText: 'Enter your college name',
+          keyboardType: TextInputType.text,
+        ),
+        const SizedBox(height: 15),
+        const Text('Undergraduate Institution'),
+        CustomTextField(
+          controller: _undergradInstitution,
+          hintText: 'Enter your undergraduate institution',
+          keyboardType: TextInputType.text,
+        ),
+        const SizedBox(height: 30),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: CustomButton(
+                text: 'Previous',
+                onPressed: _previousStep,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: CustomButton(
+                text: _fullname.text.isEmpty ? 'Submit' : 'Update',
+                onPressed: _saveUserData,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AuthSync'),
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Please enter your information',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-              Text('for ${_authService.currentUser!.email}'),
-              const SizedBox(height: 20),
+        child: Column(
+          children: [
+            // Header
+            Text(
+              'Please enter your information',
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            Text('for ${_authService.currentUser!.email}'),
+            const SizedBox(height: 20),
 
-              // Personal Information Section
-              const Text(
-                'Personal Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const Divider(),
-              const SizedBox(height: 10),
+            // Step Indicator
+            _buildStepIndicator(),
+            const SizedBox(height: 30),
 
-              const Text('Full Name *'),
-              CustomTextField(
-                controller: _fullname,
-                hintText: 'Enter your full name',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('Date of Birth *'),
-              TextField(
-                controller: _dob,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  hintText: 'DD/MM/YYYY',
-                  border: OutlineInputBorder(),
-                ),
-                onTap: () => _selectDate(context),
-              ),
-              const SizedBox(height: 15),
-
-              // Dropdown Row
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
+            // Form Content
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(), // Disable swipe
                 children: [
-                  // Gender Dropdown
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Gender *'),
-                      _buildDropdownButton<String>(
-                        items: genderOptions,
-                        value: _selectedGender,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedGender = newValue;
-                          });
-                        },
-                        hint: 'Select Gender',
-                      ),
-                    ],
-                  ),
-
-                  // Blood Group Dropdown
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Blood Group *'),
-                      _buildDropdownButton<String>(
-                        items: bloodGroupOptions,
-                        value: _selectedBloodGroup,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedBloodGroup = newValue;
-                          });
-                        },
-                        hint: 'Select Blood Group',
-                      ),
-                    ],
-                  ),
-
-                  // Language Dropdown
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Language *'),
-                      _buildDropdownButton<String>(
-                        items: languageOptions,
-                        value: _selectedLanguage,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedLanguage = newValue;
-                          });
-                        },
-                        hint: 'Select Language',
-                      ),
-                    ],
-                  ),
+                  SingleChildScrollView(child: _buildPersonalInfoStep()),
+                  SingleChildScrollView(child: _buildContactInfoStep()),
+                  SingleChildScrollView(child: _buildEducationalInfoStep()),
                 ],
               ),
-
-              const SizedBox(height: 20),
-
-              // Contact Information Section
-              const Text(
-                'Contact Information',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const Divider(),
-              const SizedBox(height: 10),
-
-              const Text('Phone Number *'),
-              CustomTextField(
-                controller: _phone,
-                hintText: 'Enter your phone number',
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('Emergency Contact'),
-              CustomTextField(
-                controller: _emergencyContact,
-                hintText: 'Name and phone number',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('Mailing Address'),
-              CustomTextField(
-                controller: _mailingAddress,
-                hintText: 'Enter your complete address',
-                keyboardType: TextInputType.streetAddress,
-              ),
-              const SizedBox(height: 20),
-
-              // Educational Background Section
-              const Text(
-                'Educational Background',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const Divider(),
-              const SizedBox(height: 10),
-
-              const Text('High School'),
-              CustomTextField(
-                controller: _highSchool,
-                hintText: 'Enter your high school name',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('College'),
-              CustomTextField(
-                controller: _college,
-                hintText: 'Enter your college name',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 15),
-
-              const Text('Undergraduate Institution'),
-              CustomTextField(
-                controller: _undergradInstitution,
-                hintText: 'Enter your undergraduate institution',
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 30),
-
-              // Submit Button
-              CustomButton(
-                  text: _fullname.text.isEmpty ? 'Submit' : 'Update',
-                  onPressed: _saveUserData),
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
