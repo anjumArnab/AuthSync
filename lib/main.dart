@@ -1,10 +1,8 @@
-import '../firebase_options.dart';
-import '../screens/user_details.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '../screens/homepage.dart';
+import '../firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../views/profile_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +21,12 @@ class AuthSync extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const AuthCheck(),
+      home: const ProfilePage(),
     );
   }
 }
 
+/*
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
 
@@ -42,11 +41,12 @@ class AuthCheck extends StatelessWidget {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
-          return const UserDetailsPage(); // User is logged in
+          return const ProfilePage(); // User is logged in
         } else {
-          return const HomePage(); // User is not logged in
+          return const Homepage(); // User is not logged in
         }
       },
     );
   }
 }
+*/
