@@ -1,0 +1,331 @@
+import 'package:flutter/material.dart';
+import '../views/accounts_page.dart';
+import '../views/change_password_page.dart';
+import '../views/update_email_page.dart';
+import '../views/delete_account_page.dart';
+import '../views/email_verification_page.dart';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final String userName = "John Doe";
+  final String userEmail = "john.doe@example.com";
+  final String userInitials = "JD";
+
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Sign Out'),
+          content: const Text('Are you sure you want to sign out?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _signOut();
+              },
+              child: const Text(
+                'Sign Out',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _signOut() {
+    // Implement sign out logic here
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Signed out successfully')),
+    );
+  }
+
+  void _navigateToUpdateEmail() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const UpdateEmailPage(),
+      ),
+    );
+  }
+
+  void _navigateToChangePassword() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const ChangePasswordPage(),
+      ),
+    );
+  }
+
+  void _navigateToEmailVerification() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const EmailVerificationPage(),
+      ),
+    );
+  }
+
+  void _navigateToMultipleAccounts() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AccountsPage(),
+      ),
+    );
+  }
+
+  void _navigateToDeleteAccount() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const DeleteAccountPage(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5FF),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  40, // Account for padding
+            ),
+            child: IntrinsicHeight(
+              child: Column(
+                children: [
+                  // Header with title and settings icon
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.settings,
+                          size: 24,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Profile Avatar
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF6B73FF),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6B73FF).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        userInitials,
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // User Name
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // User Email
+                  Text(
+                    userEmail,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+
+                  const SizedBox(height: 40),
+
+                  // Menu Items Container
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.email_outlined,
+                          title: 'Update Email',
+                          onTap: _navigateToUpdateEmail,
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.lock_outline,
+                          title: 'Change Password',
+                          onTap: _navigateToChangePassword,
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.verified_user_outlined,
+                          title: 'Email Verification',
+                          onTap: _navigateToEmailVerification,
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.people_outline,
+                          title: 'Multiple Accounts',
+                          onTap: _navigateToMultipleAccounts,
+                        ),
+                        _buildDivider(),
+                        _buildMenuItem(
+                          icon: Icons.delete_outline,
+                          title: 'Delete Account',
+                          onTap: _navigateToDeleteAccount,
+                          isDestructive: true,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Flexible spacer
+                  const Expanded(
+                    child: SizedBox(height: 30),
+                  ),
+
+                  // Sign Out Button
+                  GestureDetector(
+                    onTap: _showSignOutDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: const Text(
+                        'Sign Out',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 24,
+                color: isDestructive ? Colors.red : Colors.grey.shade600,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: isDestructive ? Colors.red : Colors.black,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 24,
+                color: Colors.grey.shade400,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      height: 1,
+      color: Colors.grey.shade200,
+    );
+  }
+}
