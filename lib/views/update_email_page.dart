@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_button.dart';
 
 class UpdateEmailPage extends StatefulWidget {
   const UpdateEmailPage({super.key});
@@ -307,37 +308,10 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 40),
 
               // Update Email Button
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _isUpdating ? null : _updateEmail,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6B73FF),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: _isUpdating
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : const Text(
-                          'Update Email',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
+              CustomButton(
+                label: 'Update Email',
+                onPressed: _updateEmail,
+                isLoading: _isUpdating,
               ),
             ],
           ),

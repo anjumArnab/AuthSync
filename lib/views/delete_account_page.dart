@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_button.dart';
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
@@ -252,29 +253,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
 
                   // Delete My Account button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isDeleteButtonEnabled ? _deleteAccount : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _isDeleteButtonEnabled
-                            ? Colors.red
-                            : Colors.grey[300],
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Delete My Account',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                  CustomButton(
+                    label: 'Delete My Account',
+                    onPressed: _deleteAccount,
+                    backgroundColor: Colors.red,
+                    isEnabled: _isDeleteButtonEnabled,
                   ),
 
                   const SizedBox(height: 16),

@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import '../views/create_acc_page.dart';
-import '../views/signIn_page.dart';
+import 'signin_page.dart';
+import '../widgets/gradient_button.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -12,9 +13,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  bool _isGetStartedPressed = false;
-  bool _isSignInPressed = false;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,55 +87,14 @@ class _HomepageState extends State<Homepage> {
               const Spacer(flex: 3),
 
               // Get Started Button
-              GestureDetector(
-                onTapDown: (_) => setState(() => _isGetStartedPressed = true),
-                onTapUp: (_) => setState(() => _isGetStartedPressed = false),
-                onTapCancel: () => setState(() => _isGetStartedPressed = false),
+              GradientButton(
+                label: 'Get Started',
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => const CreateAccountPage(),
-                    ),
+                        builder: (context) => const CreateAccountPage()),
                   );
                 },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: _isGetStartedPressed
-                          ? [
-                              const Color(0xFF6A5ACD),
-                              const Color(0xFF5B4BC4),
-                            ]
-                          : [
-                              const Color(0xFF7B68EE),
-                              const Color(0xFF6A5ACD),
-                            ],
-                    ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7B68EE).withOpacity(0.4),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Get Started',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
               ),
 
               const SizedBox(height: 24),
@@ -154,28 +111,13 @@ class _HomepageState extends State<Homepage> {
               const SizedBox(height: 8),
 
               // Sign In Link
-              GestureDetector(
-                onTapDown: (_) => setState(() => _isSignInPressed = true),
-                onTapUp: (_) => setState(() => _isSignInPressed = false),
-                onTapCancel: () => setState(() => _isSignInPressed = false),
+              GradientButton(
+                label: 'Sign In',
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const SignInPage(),
-                    ),
+                    MaterialPageRoute(builder: (context) => const SignInPage()),
                   );
                 },
-                child: AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 150),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: _isSignInPressed
-                        ? const Color(0xFF5B4BC4)
-                        : const Color(0xFF7B68EE),
-                  ),
-                  child: const Text('Sign In'),
-                ),
               ),
 
               const Spacer(flex: 2),

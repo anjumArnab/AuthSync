@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../widgets/gradient_button.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   const PhoneVerificationPage({super.key});
@@ -10,7 +11,6 @@ class PhoneVerificationPage extends StatefulWidget {
 
 class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   final TextEditingController _phoneController = TextEditingController();
-  bool _isSendCodePressed = false;
   String _selectedCountryCode = '+1';
   String _selectedCountry = 'US';
   bool _isPhoneValid = false;
@@ -204,10 +204,8 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               const SizedBox(height: 32),
 
               // Send Code Button
-              GestureDetector(
-                onTapDown: (_) => setState(() => _isSendCodePressed = true),
-                onTapUp: (_) => setState(() => _isSendCodePressed = false),
-                onTapCancel: () => setState(() => _isSendCodePressed = false),
+              GradientButton(
+                label: 'Send Code',
                 onTap: _isPhoneValid
                     ? () {
                         print('Send Code tapped');
@@ -216,57 +214,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                         _showCodeSentDialog();
                       }
                     : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: _isPhoneValid
-                        ? LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: _isSendCodePressed
-                                ? [
-                                    const Color(0xFF6A5ACD),
-                                    const Color(0xFF5B4BC4),
-                                  ]
-                                : [
-                                    const Color(0xFF7B68EE),
-                                    const Color(0xFF6A5ACD),
-                                  ],
-                          )
-                        : const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFFE5E7EB),
-                              Color(0xFFD1D5DB),
-                            ],
-                          ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: _isPhoneValid
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFF7B68EE).withOpacity(0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Send Code',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: _isPhoneValid
-                            ? Colors.white
-                            : const Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ),
-                ),
               ),
 
               const SizedBox(height: 24),

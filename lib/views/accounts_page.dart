@@ -1,7 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../views/signIn_page.dart';
+import 'signin_page.dart';
+import '../widgets/custom_button.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -181,27 +182,9 @@ class _AccountsPageState extends State<AccountsPage> {
             const SizedBox(height: 24),
 
             // Switch Account Button
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: _switchAccount,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6B73FF),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Switch Account',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
+            CustomButton(
+              label: 'Switch Account',
+              onPressed: _switchAccount,
             ),
 
             const SizedBox(height: 20),

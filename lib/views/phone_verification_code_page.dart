@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../widgets/custom_button.dart';
 
 class PhoneVerificationCodePage extends StatefulWidget {
   const PhoneVerificationCodePage({super.key});
@@ -59,12 +60,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     if (allFilled) {
       // Auto verify when all fields are filled
       _verifyCode();
-    }
-  }
-
-  void _onBackspace(int index) {
-    if (index > 0 && _controllers[index].text.isEmpty) {
-      _focusNodes[index - 1].requestFocus();
     }
   }
 
@@ -230,37 +225,9 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             const SizedBox(height: 40),
 
             // Verify button
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: _isVerifying ? null : _verifyCode,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6B73FF),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 0,
-                ),
-                child: _isVerifying
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text(
-                        'Verify Code',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
+            CustomButton(
+              label: 'Verify Code',
+              onPressed: _isVerifying ? null : _verifyCode,
             ),
 
             const SizedBox(height: 24),

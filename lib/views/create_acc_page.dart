@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../views/signIn_page.dart';
+import 'signin_page.dart';
+import '../widgets/gradient_button.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -18,7 +19,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
-  bool _isCreateAccountPressed = false;
 
   @override
   void dispose() {
@@ -191,72 +191,16 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               const SizedBox(height: 32),
 
               // Create Account Button
-              GestureDetector(
-                onTapDown: (_) =>
-                    setState(() => _isCreateAccountPressed = true),
-                onTapUp: (_) => setState(() => _isCreateAccountPressed = false),
-                onTapCancel: () =>
-                    setState(() => _isCreateAccountPressed = false),
-                onTap: _isFormValid
-                    ? () {
-                        print('Create Account tapped');
-                        print('Full Name: ${_fullNameController.text}');
-                        print('Email: ${_emailController.text}');
-                        print('Password: ${_passwordController.text}');
-                        print('Terms Agreed: $_agreeToTerms');
-                      }
-                    : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: _isFormValid
-                        ? LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: _isCreateAccountPressed
-                                ? [
-                                    const Color(0xFF6A5ACD),
-                                    const Color(0xFF5B4BC4),
-                                  ]
-                                : [
-                                    const Color(0xFF7B68EE),
-                                    const Color(0xFF6A5ACD),
-                                  ],
-                          )
-                        : const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFFE5E7EB),
-                              Color(0xFFD1D5DB),
-                            ],
-                          ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: _isFormValid
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFF7B68EE).withOpacity(0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Create Account',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: _isFormValid
-                            ? Colors.white
-                            : const Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ),
-                ),
+              GradientButton(
+                label: 'Create Account',
+                isEnabled: _isFormValid,
+                onTap: () {
+                  print('Create Account tapped');
+                  print('Full Name: ${_fullNameController.text}');
+                  print('Email: ${_emailController.text}');
+                  print('Password: ${_passwordController.text}');
+                  print('Terms Agreed: $_agreeToTerms');
+                },
               ),
 
               const SizedBox(height: 32),

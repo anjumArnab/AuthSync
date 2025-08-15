@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_button.dart';
 
 class EmailVerificationPage extends StatefulWidget {
   const EmailVerificationPage({super.key});
@@ -168,28 +169,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   const SizedBox(height: 24),
 
                   // Send Verification Email button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _sendVerificationEmail,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color(0xFF6366F1), // Indigo color
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Send Verification Email',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                  CustomButton(
+                    label: 'Send Verification Email',
+                    onPressed: _sendVerificationEmail,
+                    backgroundColor: const Color(0xFF6366F1),
                   ),
 
                   const SizedBox(height: 16),

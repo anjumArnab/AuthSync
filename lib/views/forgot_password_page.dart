@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/gradient_button.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -9,7 +10,6 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
-  bool _isSendResetPressed = false;
   bool _isEmailValid = false;
 
   @override
@@ -160,69 +160,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               const SizedBox(height: 32),
 
               // Send Reset Link Button
-              GestureDetector(
-                onTapDown: (_) => setState(() => _isSendResetPressed = true),
-                onTapUp: (_) => setState(() => _isSendResetPressed = false),
-                onTapCancel: () => setState(() => _isSendResetPressed = false),
-                onTap: _isEmailValid
-                    ? () {
-                        print('Send Reset Link tapped');
-                        print('Email: ${_emailController.text}');
-                        // Show success message or navigate to success PaForgotPasswordPage
-                        _showResetLinkSentDialog();
-                      }
-                    : null,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: double.infinity,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: _isEmailValid
-                        ? LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: _isSendResetPressed
-                                ? [
-                                    const Color(0xFF6A5ACD),
-                                    const Color(0xFF5B4BC4),
-                                  ]
-                                : [
-                                    const Color(0xFF7B68EE),
-                                    const Color(0xFF6A5ACD),
-                                  ],
-                          )
-                        : const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Color(0xFFE5E7EB),
-                              Color(0xFFD1D5DB),
-                            ],
-                          ),
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: _isEmailValid
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFF7B68EE).withOpacity(0.4),
-                              blurRadius: 16,
-                              offset: const Offset(0, 8),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Send Reset Link',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: _isEmailValid
-                            ? Colors.white
-                            : const Color(0xFF9CA3AF),
-                      ),
-                    ),
-                  ),
-                ),
+              GradientButton(
+                label: 'Send Reset Link',
+                isEnabled: _isEmailValid,
+                onTap: () {
+                  print('Send Reset Link tapped');
+                  print('Email: ${_emailController.text}');
+                  _showResetLinkSentDialog();
+                },
               ),
 
               const Spacer(),
