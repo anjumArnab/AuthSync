@@ -99,25 +99,36 @@ class _HomepageState extends State<Homepage> {
 
               const SizedBox(height: 24),
 
-              // Sign In Text
-              const Text(
-                'Already have an account?',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF718096),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
               // Sign In Link
-              GradientButton(
-                label: 'Sign In',
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => const SignInPage()),
-                  );
-                },
+              Center(
+                child: RichText(
+                  text: TextSpan(
+                    text: "Already have an account? ",
+                    style: const TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontSize: 14,
+                    ),
+                    children: [
+                      WidgetSpan(
+                        child: GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const SignInPage(),
+                            ),
+                          ),
+                          child: const Text(
+                            'Sign In',
+                            style: TextStyle(
+                              color: Color(0xFF7B68EE),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               const Spacer(flex: 2),

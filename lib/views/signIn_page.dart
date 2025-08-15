@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../views/forgot_password_page.dart';
 import '../views/create_acc_page.dart';
 import '../views/phone_verification_page.dart';
+import '../widgets/gradient_button.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -14,7 +15,6 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isSignInPressed = false;
 
   @override
   void dispose() {
@@ -202,53 +202,13 @@ class _SignInPageState extends State<SignInPage> {
                   const SizedBox(height: 24),
 
                   // Sign In Button
-                  GestureDetector(
-                    onTapDown: (_) => setState(() => _isSignInPressed = true),
-                    onTapUp: (_) => setState(() => _isSignInPressed = false),
-                    onTapCancel: () => setState(() => _isSignInPressed = false),
+                  GradientButton(
+                    label: 'Sign In',
                     onTap: () {
                       print('Sign In tapped');
                       print('Email: ${_emailController.text}');
                       print('Password: ${_passwordController.text}');
                     },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 150),
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: _isSignInPressed
-                              ? [
-                                  const Color(0xFF6A5ACD),
-                                  const Color(0xFF5B4BC4),
-                                ]
-                              : [
-                                  const Color(0xFF7B68EE),
-                                  const Color(0xFF6A5ACD),
-                                ],
-                        ),
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7B68EE).withOpacity(0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Sign In',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
                   ),
 
                   const SizedBox(height: 32),

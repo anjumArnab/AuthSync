@@ -276,33 +276,24 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 24),
 
               // Information Banner
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3CD),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFFDBF47)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.info_outline,
-                      color: Color(0xFF856404),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'We\'ll send a verification link to your new email address',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.brown.shade700,
-                          fontWeight: FontWeight.w500,
-                        ),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'We\'ll send a verification link to your new email address',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.brown.shade700,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 40),
