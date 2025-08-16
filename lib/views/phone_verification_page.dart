@@ -2,19 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
+import '../services/auth_service.dart';
+import '../views/phone_verification_code_page.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
-  const PhoneVerificationPage({super.key});
+  final bool
+      isSignIn; // true for sign in, false for linking to existing account
+
+  const PhoneVerificationPage({
+    super.key,
+    this.isSignIn = true,
+  });
 
   @override
   State<PhoneVerificationPage> createState() => _PhoneVerificationPageState();
 }
 
 class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
+  final _authService = AuthService(); // Initialize AuthService
   final TextEditingController _phoneController = TextEditingController();
+
   String _selectedCountryCode = '+1';
-  String _selectedCountry = 'US';
+  String _selectedCountry = 'US'; // Default to US
   bool _isPhoneValid = false;
+  bool _isSendingCode = false;
+  String? _verificationId;
 
   final List<Map<String, String>> _countryCodes = [
     {'code': '+1', 'country': 'US', 'name': 'United States'},
@@ -48,21 +60,99 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
     });
   }
 
-  String _formatPhoneNumber(String value) {
-    // Remove all non-digit characters
-    String digitsOnly = value.replaceAll(RegExp(r'[^\d]'), '');
+  String _getFullPhoneNumber() {
+    String digitsOnly = _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
+    return '$_selectedCountryCode$digitsOnly';
+  }
 
-    // Format as (XXX) XXX-XXXX for US numbers
-    if (digitsOnly.length <= 3) {
-      return digitsOnly;
-    } else if (digitsOnly.length <= 6) {
-      return '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
-    } else if (digitsOnly.length <= 10) {
-      return '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}';
-    } else {
-      // Limit to 10 digits
-      return '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}';
+  void _sendVerificationCode() async {
+    if (!_isPhoneValid || _isSendingCode) return;
+
+    setState(() {
+      _isSendingCode = true;
+    });
+
+    String fullPhoneNumber = _getFullPhoneNumber();
+
+    try {
+      await _authService.verifyPhoneNumber(
+        phoneNumber: fullPhoneNumber,
+        verificationCompleted: (credential) async {
+          // Auto-verification completed (Android only)
+          try {
+            if (widget.isSignIn) {
+              await _authService.signInWithPhoneCredential(
+                verificationId: '',
+                smsCode: '',
+              );
+            }
+            if (mounted) {
+              setState(() {
+                _isSendingCode = false;
+              });
+              _showSnackBar(
+                  'Phone number verified automatically!', Colors.green);
+              Navigator.of(context).pop(); // Go back to previous page
+            }
+          } catch (e) {
+            if (mounted) {
+              setState(() {
+                _isSendingCode = false;
+              });
+              _showSnackBar(e.toString(), Colors.red);
+            }
+          }
+        },
+        verificationFailed: (e) {
+          if (mounted) {
+            setState(() {
+              _isSendingCode = false;
+            });
+            _showSnackBar(
+              e.message ?? 'Phone verification failed',
+              Colors.red,
+            );
+          }
+        },
+        codeSent: (verificationId, resendToken) {
+          if (mounted) {
+            setState(() {
+              _isSendingCode = false;
+              _verificationId = verificationId;
+            });
+            _showCodeSentDialog();
+          }
+        },
+        codeAutoRetrievalTimeout: (verificationId) {
+          if (mounted) {
+            setState(() {
+              _verificationId = verificationId;
+            });
+          }
+        },
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSendingCode = false;
+        });
+        _showSnackBar(e.toString(), Colors.red);
+      }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
   @override
@@ -78,9 +168,9 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: const Text(
-          'Phone Verification',
-          style: TextStyle(
+        title: Text(
+          widget.isSignIn ? 'Phone Sign In' : 'Link Phone Number',
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Color(0xFF2D3748),
@@ -113,9 +203,11 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               const SizedBox(height: 32),
 
               // Description Text
-              const Text(
-                'Enter your phone number to receive a verification code',
-                style: TextStyle(
+              Text(
+                widget.isSignIn
+                    ? 'Enter your phone number to sign in with SMS verification'
+                    : 'Enter your phone number to link it to your account',
+                style: const TextStyle(
                   fontSize: 16,
                   color: Color(0xFF6B7280),
                   height: 1.5,
@@ -185,6 +277,9 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                           _PhoneNumberFormatter(),
                         ],
                         onChanged: _onPhoneChanged,
+                        filled:
+                            false, // Remove fill since parent container has background
+                        fillColor: Colors.transparent,
                       ),
                     ),
                   ],
@@ -195,16 +290,33 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
 
               // Send Code Button
               GradientButton(
-                label: 'Send Code',
-                onTap: _isPhoneValid
-                    ? () {
-                        print('Send Code tapped');
-                        print(
-                            'Phone: $_selectedCountryCode ${_phoneController.text}');
-                        _showCodeSentDialog();
-                      }
+                label: _isSendingCode ? 'Sending Code...' : 'Send Code',
+                onTap: (_isPhoneValid && !_isSendingCode)
+                    ? _sendVerificationCode
                     : null,
               ),
+
+              if (_isSendingCode) ...[
+                const SizedBox(height: 16),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Sending verification code...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
 
               const SizedBox(height: 24),
 
@@ -217,6 +329,37 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                   height: 1.4,
                 ),
                 textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // Help text
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 20,
+                      color: Colors.blue.shade700,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Make sure your phone number is correct. You\'ll receive a 6-digit verification code.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               const Spacer(),
@@ -351,7 +494,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'We\'ve sent a verification code to\n$_selectedCountryCode ${_phoneController.text}',
+                'We\'ve sent a verification code to\n${_getFullPhoneNumber()}',
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF6B7280),
@@ -365,8 +508,22 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop(); // Close dialog
-                    // Navigate to verification code input Page
-                    print('Navigate to code verification Page');
+                    if (_verificationId != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PhoneVerificationCodePage(
+                            phoneNumber: _getFullPhoneNumber(),
+                            verificationId: _verificationId!,
+                            isSignIn: widget.isSignIn,
+                          ),
+                        ),
+                      );
+                    } else {
+                      _showSnackBar(
+                        'Verification ID not available. Please try again.',
+                        Colors.red,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF7B68EE),

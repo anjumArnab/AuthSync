@@ -1,5 +1,6 @@
 import 'package:authsync/widgets/auth_field.dart';
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../widgets/custom_button.dart';
 
 class ChangePasswordPage extends StatefulWidget {
@@ -20,10 +21,13 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool _isConfirmPasswordVisible = false;
   bool _isUpdating = false;
 
+  final AuthService _authService = AuthService(); // Initialize AuthService
+
   // Password validation requirements
   bool _hasMinLength = false;
   bool _hasUppercase = false;
   bool _hasNumber = false;
+  bool _hasSpecialChar = false; // Add special character requirement
 
   @override
   void initState() {
@@ -42,37 +46,94 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   void _validatePassword() {
     String password = _newPasswordController.text;
     setState(() {
-      _hasMinLength = password.length >= 8;
+      _hasMinLength = password.length >= 6; // Firebase minimum is 6
       _hasUppercase = password.contains(RegExp(r'[A-Z]'));
       _hasNumber = password.contains(RegExp(r'[0-9]'));
+      _hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
   }
 
   bool get _isPasswordValid => _hasMinLength && _hasUppercase && _hasNumber;
 
-  void _updatePassword() async {
+  // Function to handle password change
+  Future<void> _updatePassword() async {
     if (!_formKey.currentState!.validate()) return;
-    if (!_isPasswordValid) return;
+    if (!_isPasswordValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please ensure your password meets all requirements',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    // Check if user is signed in
+    if (!_authService.isUserSignedIn()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please sign in to change your password',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isUpdating = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    setState(() {
-      _isUpdating = false;
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password updated successfully!'),
-          backgroundColor: Colors.green,
-        ),
+    try {
+      // Change password using AuthService
+      await _authService.changePassword(
+        currentPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
       );
-      Navigator.pop(context);
+
+      if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Password updated successfully!',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        // Navigate back after successful update
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdating = false;
+        });
+      }
     }
   }
 
@@ -85,7 +146,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+          onPressed: _isUpdating ? null : () => Navigator.pop(context),
         ),
         title: const Text(
           'Change Password',
@@ -103,6 +164,39 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Current user info
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Color(0xFF7B68EE)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Changing password for: ${_authService.getCurrentUserEmail() ?? 'Current user'}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               // Current Password
               const Text(
                 'Current Password',
@@ -133,6 +227,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter your current password';
+                  }
+                  if (value.length < 6) {
+                    return 'Current password is too short';
                   }
                   return null;
                 },
@@ -169,6 +266,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a new password';
+                  }
+                  if (value == _currentPasswordController.text) {
+                    return 'New password must be different from current password';
                   }
                   if (!_isPasswordValid) {
                     return 'Password does not meet requirements';
@@ -246,7 +346,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     ),
                     const SizedBox(height: 12),
                     _buildRequirement(
-                      'At least 8 characters',
+                      'At least 6 characters',
                       _hasMinLength,
                     ),
                     const SizedBox(height: 8),
@@ -259,16 +359,45 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                       'One number',
                       _hasNumber,
                     ),
+                    const SizedBox(height: 8),
+                    _buildRequirement(
+                      'One special character (recommended)',
+                      _hasSpecialChar,
+                      isOptional: true,
+                    ),
                   ],
                 ),
               ),
+
+              // Loading indicator
+              if (_isUpdating) ...[
+                const SizedBox(height: 24),
+                const Center(
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFF7B68EE)),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Updating password...',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 40),
 
               // Update Password Button
               CustomButton(
-                label: 'Update Password',
-                onPressed: _updatePassword,
+                label: _isUpdating ? 'Updating Password...' : 'Update Password',
+                onPressed: _isUpdating ? null : _updatePassword,
                 isLoading: _isUpdating,
               ),
             ],
@@ -278,21 +407,31 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  Widget _buildRequirement(String text, bool isMet) {
+  Widget _buildRequirement(String text, bool isMet, {bool isOptional = false}) {
     return Row(
       children: [
         Icon(
-          isMet ? Icons.check_circle : Icons.radio_button_unchecked,
+          isMet
+              ? Icons.check_circle
+              : (isOptional
+                  ? Icons.info_outline
+                  : Icons.radio_button_unchecked),
           size: 18,
-          color: isMet ? Colors.green : Colors.grey.shade400,
+          color: isMet
+              ? Colors.green
+              : (isOptional ? Colors.blue : Colors.grey.shade400),
         ),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: 14,
-            color: isMet ? Colors.green : Colors.grey.shade600,
-            fontWeight: isMet ? FontWeight.w500 : FontWeight.normal,
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: isMet
+                  ? Colors.green
+                  : (isOptional ? Colors.blue : Colors.grey.shade600),
+              fontWeight: isMet ? FontWeight.w500 : FontWeight.normal,
+            ),
           ),
         ),
       ],

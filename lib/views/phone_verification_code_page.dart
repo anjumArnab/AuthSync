@@ -2,9 +2,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/custom_button.dart';
+import '../services/auth_service.dart';
 
 class PhoneVerificationCodePage extends StatefulWidget {
-  const PhoneVerificationCodePage({super.key});
+  final String verificationId;
+  final String phoneNumber;
+  final bool
+      isSignIn; // true for sign in, false for linking to existing account
+
+  const PhoneVerificationCodePage({
+    super.key,
+    required this.verificationId,
+    required this.phoneNumber,
+    this.isSignIn = true,
+  });
 
   @override
   State<PhoneVerificationCodePage> createState() =>
@@ -12,12 +23,16 @@ class PhoneVerificationCodePage extends StatefulWidget {
 }
 
 class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
+  final _authService = AuthService(); // Initialize AuthService
+
   final List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
-  int _countdown = 47;
-  late Timer _timer;
+
+  int _countdown = 60; // Standard 60 seconds
+  Timer? _timer;
   bool _isVerifying = false;
+  bool _isResending = false;
 
   @override
   void initState() {
@@ -26,8 +41,13 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
   }
 
   void _startCountdown() {
+    _timer?.cancel();
+    setState(() {
+      _countdown = 60;
+    });
+
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 0) {
+      if (_countdown > 0 && mounted) {
         setState(() {
           _countdown--;
         });
@@ -39,7 +59,7 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     for (var controller in _controllers) {
       controller.dispose();
     }
@@ -63,35 +83,203 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     }
   }
 
-  void _verifyCode() {
+  void _onKeyPressed(RawKeyEvent event, int index) {
+    if (event is RawKeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.backspace) {
+        if (_controllers[index].text.isEmpty && index > 0) {
+          _focusNodes[index - 1].requestFocus();
+          _controllers[index - 1].clear();
+        }
+      }
+    }
+  }
+
+  void _verifyCode() async {
+    if (_isVerifying) return;
+
+    String code = _controllers.map((controller) => controller.text).join();
+
+    if (code.length != 6) {
+      _showSnackBar('Please enter the complete 6-digit code', Colors.orange);
+      return;
+    }
+
     setState(() {
       _isVerifying = true;
     });
 
-    String code = _controllers.map((controller) => controller.text).join();
-
-    // Simulate verification process
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isVerifying = false;
-      });
-
-      // Handle verification result
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Verification code: $code')),
+    try {
+      final credential = await _authService.verifyPhoneWithCode(
+        verificationId: widget.verificationId,
+        smsCode: code,
       );
-    });
+
+      if (credential != null && mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+
+        if (widget.isSignIn) {
+          _showSuccessDialog('Phone Sign In Successful',
+              'You have successfully signed in with your phone number.');
+        } else {
+          _showSuccessDialog('Phone Number Linked',
+              'Your phone number has been successfully linked to your account.');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isVerifying = false;
+        });
+
+        // Clear the input fields for retry
+        _clearCodeFields();
+
+        _showSnackBar(
+          _getErrorMessage(e.toString()),
+          Colors.red,
+        );
+      }
+    }
   }
 
-  void _resendCode() {
-    setState(() {
-      _countdown = 47;
-    });
-    _startCountdown();
+  void _resendCode() async {
+    if (_isResending || _countdown > 0) return;
 
+    setState(() {
+      _isResending = true;
+    });
+
+    try {
+      await _authService.verifyPhoneNumber(
+        phoneNumber: widget.phoneNumber,
+        verificationCompleted: (credential) async {
+          // Auto-verification completed
+          try {
+            if (widget.isSignIn) {
+              await _authService.signInWithPhoneCredential(
+                verificationId: widget.verificationId,
+                smsCode: '',
+              );
+            }
+            if (mounted) {
+              _showSuccessDialog(
+                  'Auto Verification', 'Phone number verified automatically.');
+            }
+          } catch (e) {
+            if (mounted) {
+              _showSnackBar(e.toString(), Colors.red);
+            }
+          }
+        },
+        verificationFailed: (e) {
+          if (mounted) {
+            setState(() {
+              _isResending = false;
+            });
+            _showSnackBar(e.message ?? 'Verification failed', Colors.red);
+          }
+        },
+        codeSent: (verificationId, resendToken) {
+          if (mounted) {
+            setState(() {
+              _isResending = false;
+            });
+            // Update verification ID for the new code
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => PhoneVerificationCodePage(
+                  verificationId: verificationId,
+                  phoneNumber: widget.phoneNumber,
+                  isSignIn: widget.isSignIn,
+                ),
+              ),
+            );
+            _showSnackBar('New verification code sent!', Colors.green);
+          }
+        },
+        codeAutoRetrievalTimeout: (verificationId) {
+          // Handle timeout if needed
+        },
+      );
+
+      if (mounted) {
+        _startCountdown();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isResending = false;
+        });
+        _showSnackBar(e.toString(), Colors.red);
+      }
+    }
+  }
+
+  void _clearCodeFields() {
+    for (var controller in _controllers) {
+      controller.clear();
+    }
+    _focusNodes[0].requestFocus();
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Code resent successfully!')),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
     );
+  }
+
+  void _showSuccessDialog(String title, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.green, size: 28),
+              const SizedBox(width: 8),
+              Text(title),
+            ],
+          ),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pop(); // Go back to previous page
+                // Optionally navigate to home/main page
+              },
+              child: const Text('Continue'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _getErrorMessage(String error) {
+    if (error.contains('invalid-verification-code')) {
+      return 'Invalid verification code. Please check and try again.';
+    } else if (error.contains('session-expired')) {
+      return 'Verification session expired. Please request a new code.';
+    } else if (error.contains('too-many-requests')) {
+      return 'Too many attempts. Please try again later.';
+    }
+    return 'Verification failed. Please try again.';
   }
 
   @override
@@ -104,6 +292,14 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.isSignIn ? 'Phone Sign In' : 'Link Phone Number',
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: Padding(
@@ -153,9 +349,9 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             const SizedBox(height: 8),
 
             // Phone number
-            const Text(
-              '+1 (555) 123-4567',
-              style: TextStyle(
+            Text(
+              widget.phoneNumber,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
@@ -171,52 +367,53 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
                 return SizedBox(
                   width: 45,
                   height: 55,
-                  child: TextFormField(
-                    controller: _controllers[index],
-                    focusNode: _focusNodes[index],
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    maxLength: 1,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      filled: true,
-                      fillColor: Colors.grey.shade100,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
+                  child: RawKeyboardListener(
+                    focusNode: FocusNode(),
+                    onKey: (event) => _onKeyPressed(event, index),
+                    child: TextFormField(
+                      controller: _controllers[index],
+                      focusNode: _focusNodes[index],
+                      textAlign: TextAlign.center,
+                      keyboardType: TextInputType.number,
+                      maxLength: 1,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Colors.blue,
-                          width: 2,
+                      decoration: InputDecoration(
+                        counterText: '',
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Colors.red,
+                            width: 1,
+                          ),
                         ),
                       ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      onChanged: (value) => _onChanged(value, index),
+                      onTap: () {
+                        _controllers[index].selection =
+                            TextSelection.fromPosition(
+                          TextPosition(offset: _controllers[index].text.length),
+                        );
+                      },
                     ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    onChanged: (value) => _onChanged(value, index),
-                    onTap: () {
-                      _controllers[index].selection =
-                          TextSelection.fromPosition(
-                        TextPosition(offset: _controllers[index].text.length),
-                      );
-                    },
-                    onEditingComplete: () {
-                      if (index < 5) {
-                        _focusNodes[index + 1].requestFocus();
-                      }
-                    },
-                    onFieldSubmitted: (value) {
-                      if (index < 5) {
-                        _focusNodes[index + 1].requestFocus();
-                      }
-                    },
                   ),
                 );
               }),
@@ -226,25 +423,82 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
 
             // Verify button
             CustomButton(
-              label: 'Verify Code',
+              label: _isVerifying ? 'Verifying...' : 'Verify Code',
               onPressed: _isVerifying ? null : _verifyCode,
+              isLoading: _isVerifying,
             ),
 
             const SizedBox(height: 24),
 
             // Resend code text
             GestureDetector(
-              onTap: _countdown == 0 ? _resendCode : null,
-              child: Text(
-                _countdown > 0
-                    ? "Didn't receive code? Resend in 0:${_countdown.toString().padLeft(2, '0')}"
-                    : "Didn't receive code? Resend",
-                style: TextStyle(
-                  fontSize: 14,
-                  color: _countdown > 0 ? Colors.grey : Colors.blue,
-                  fontWeight:
-                      _countdown == 0 ? FontWeight.w600 : FontWeight.normal,
-                ),
+              onTap: (_countdown == 0 && !_isResending) ? _resendCode : null,
+              child: _isResending
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.blue.shade600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Sending new code...',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Text(
+                      _countdown > 0
+                          ? "Didn't receive code? Resend in 0:${_countdown.toString().padLeft(2, '0')}"
+                          : "Didn't receive code? Resend",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: _countdown > 0 ? Colors.grey : Colors.blue,
+                        fontWeight: _countdown == 0
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Help text
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: Colors.blue.shade700,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'The verification code will expire in 10 minutes. Make sure to enter it correctly.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue.shade700,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
 

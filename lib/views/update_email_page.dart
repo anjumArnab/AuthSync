@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/auth_field.dart';
+import '../services/auth_service.dart';
 
 class UpdateEmailPage extends StatefulWidget {
   const UpdateEmailPage({super.key});
@@ -13,10 +14,18 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final _newEmailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService(); // Initialize AuthService
 
-  final String currentEmail = "john.doe@example.com";
+  String? currentEmail;
   bool _passwordVisible = false;
   bool _isUpdating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Get current user's email
+    currentEmail = _authService.getCurrentUserEmail();
+  }
 
   @override
   void dispose() {
@@ -34,12 +43,10 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
 
     // Check if new email is different from current email
     if (_newEmailController.text.trim().toLowerCase() ==
-        currentEmail.toLowerCase()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('New email must be different from current email'),
-          backgroundColor: Colors.orange,
-        ),
+        (currentEmail?.toLowerCase() ?? '')) {
+      _showSnackBar(
+        'New email must be different from current email',
+        Colors.orange,
       );
       return;
     }
@@ -48,17 +55,49 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
       _isUpdating = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Call Firebase Auth service to update email
+      await _authService.updateEmail(
+        newEmail: _newEmailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-    setState(() {
-      _isUpdating = false;
-    });
+      // Send email verification to the new email
+      await _authService.sendEmailVerification();
 
-    if (mounted) {
-      // Show success dialog
-      _showSuccessDialog();
+      if (mounted) {
+        setState(() {
+          _isUpdating = false;
+        });
+        _showSuccessDialog();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isUpdating = false;
+        });
+
+        // Show error message
+        _showSnackBar(
+          e.toString(),
+          Colors.red,
+        );
+      }
     }
+  }
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
   void _showSuccessDialog() {
@@ -79,14 +118,14 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
           ),
           content: Text(
             'We\'ve sent a verification link to ${_newEmailController.text}. '
-            'Please check your inbox and click the verification link to complete the email update.',
+            'Please check your inbox and click the verification link to complete the email update. '
+            'You may need to sign in again after verification.',
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close dialog
-                Navigator.of(context)
-                    .pop(); // Go back to previous PAgeUpdateEmailPage
+                Navigator.of(context).pop(); // Go back to previous page
               },
               child: const Text('Got it'),
             ),
@@ -143,7 +182,7 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
                   border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Text(
-                  currentEmail,
+                  currentEmail ?? 'No email found',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey.shade600,
@@ -154,7 +193,6 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 24),
 
               // New Email
-
               AuthField(
                 controller: _newEmailController,
                 label: "New Email",
@@ -174,11 +212,10 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 24),
 
               // Confirm Password
-
               AuthField(
                 controller: _passwordController,
                 label: "Password",
-                hintText: "Enter your password",
+                hintText: "Enter your current password",
                 obscureText: !_passwordVisible,
                 keyboardType: TextInputType.visiblePassword,
                 suffixIcon: IconButton(
@@ -194,7 +231,10 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your password to confirm';
+                    return 'Please enter your current password to confirm';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
                   }
                   return null;
                 },
@@ -203,21 +243,21 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 24),
 
               // Information Banner
+
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.info_outline,
                     size: 20,
+                    color: Colors.blue.shade700,
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'We\'ll send a verification link to your new email address',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.brown.shade700,
-                        fontWeight: FontWeight.w500,
-                      ),
+                  Text(
+                    'We\'ll send a verification link to your new email address.\n You may need to sign in again after verification.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue.shade700,
                     ),
                   ),
                 ],

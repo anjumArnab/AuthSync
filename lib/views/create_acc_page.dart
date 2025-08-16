@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signin_page.dart';
+import 'profile_page.dart';
+import '../services/auth_service.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
 
@@ -20,6 +22,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
+  bool _isLoading = false; // Add loading state
+
+  final AuthService _authService = AuthService(); // Initialize AuthService
 
   @override
   void dispose() {
@@ -36,7 +41,80 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
         _passwordController.text.isNotEmpty &&
         _confirmPasswordController.text.isNotEmpty &&
         _passwordController.text == _confirmPasswordController.text &&
+        _passwordController.text.length >=
+            6 && // Add password length validation
         _agreeToTerms;
+  }
+
+  // Function to handle account creation
+  Future<void> _createAccount() async {
+    if (!_isFormValid) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Create account with AuthService
+      final result = await _authService.createAccount(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        displayName: _fullNameController.text.trim(),
+      );
+
+      if (result != null) {
+        // Send email verification
+        try {
+          await _authService.sendEmailVerification();
+        } catch (e) {
+          // Email verification failed, but account was created
+          print('Email verification failed: $e');
+        }
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Account created successfully! Please check your email for verification.',
+                style: TextStyle(color: Colors.white),
+              ),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+
+        // Navigate to ProfilePage
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const ProfilePage(),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -76,14 +154,31 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 controller: _fullNameController,
                 hintText: 'Enter your full name',
                 keyboardType: TextInputType.name,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your full name';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 20),
+
               // Email Field
               AuthField(
                 label: 'Email',
                 controller: _emailController,
                 hintText: 'Enter your email',
                 keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                      .hasMatch(value)) {
+                    return 'Please enter a valid email';
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 20),
@@ -110,6 +205,9 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return "Please enter password";
+                  }
+                  if (value.length < 6) {
+                    return "Password must be at least 6 characters";
                   }
                   return null;
                 },
@@ -138,7 +236,10 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Please enter password";
+                    return "Please confirm your password";
+                  }
+                  if (value != _passwordController.text) {
+                    return "Passwords do not match";
                   }
                   return null;
                 },
@@ -221,16 +322,21 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
               // Create Account Button
               GradientButton(
-                label: 'Create Account',
-                isEnabled: _isFormValid,
-                onTap: () {
-                  print('Create Account tapped');
-                  print('Full Name: ${_fullNameController.text}');
-                  print('Email: ${_emailController.text}');
-                  print('Password: ${_passwordController.text}');
-                  print('Terms Agreed: $_agreeToTerms');
-                },
+                label: _isLoading ? 'Creating Account...' : 'Create Account',
+                isEnabled: _isFormValid && !_isLoading,
+                onTap: _isLoading ? null : _createAccount,
               ),
+
+              // Loading indicator
+              if (_isLoading) ...[
+                const SizedBox(height: 16),
+                const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFF7B68EE)),
+                  ),
+                ),
+              ],
 
               const SizedBox(height: 32),
 
@@ -246,7 +352,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     children: [
                       WidgetSpan(
                         child: GestureDetector(
-                          onTap: () => Navigator.of(context).push(
+                          onTap: () => Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
                                   builder: (context) => const SignInPage())),
                           child: const Text(
