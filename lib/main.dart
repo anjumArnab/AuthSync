@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../views/homepage.dart';
 import '../views/profile_page.dart';
 
 void main() async {
@@ -21,12 +23,11 @@ class AuthSync extends StatelessWidget {
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const ProfilePage(),
+      home: const AuthCheck(),
     );
   }
 }
 
-/*
 class AuthCheck extends StatelessWidget {
   const AuthCheck({super.key});
 
@@ -49,4 +50,3 @@ class AuthCheck extends StatelessWidget {
     );
   }
 }
-*/
