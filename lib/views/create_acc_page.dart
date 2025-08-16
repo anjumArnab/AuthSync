@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signin_page.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/auth_field.dart';
 
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
@@ -70,17 +71,15 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               const SizedBox(height: 20),
 
               // Full Name Field
-              _buildInputField(
+              AuthField(
                 label: 'Full Name',
                 controller: _fullNameController,
                 hintText: 'Enter your full name',
                 keyboardType: TextInputType.name,
               ),
-
               const SizedBox(height: 20),
-
               // Email Field
-              _buildInputField(
+              AuthField(
                 label: 'Email',
                 controller: _emailController,
                 hintText: 'Enter your email',
@@ -90,28 +89,58 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
               const SizedBox(height: 20),
 
               // Password Field
-              _buildPasswordField(
-                label: 'Password',
+              AuthField(
+                label: "Password",
                 controller: _passwordController,
-                isVisible: _isPasswordVisible,
-                onVisibilityToggle: () {
-                  setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
-                  });
+                hintText: "••••••••",
+                obscureText: !_isPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter password";
+                  }
+                  return null;
                 },
               ),
 
               const SizedBox(height: 20),
 
               // Confirm Password Field
-              _buildPasswordField(
-                label: 'Confirm Password',
+              AuthField(
+                label: "Confirm Password",
                 controller: _confirmPasswordController,
-                isVisible: _isConfirmPasswordVisible,
-                onVisibilityToggle: () {
-                  setState(() {
-                    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                  });
+                hintText: "••••••••",
+                obscureText: !_isConfirmPasswordVisible,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter password";
+                  }
+                  return null;
                 },
               ),
 
@@ -240,139 +269,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInputField({
-    required String label,
-    required TextEditingController controller,
-    required String hintText,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF2D3748),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          onChanged: (_) =>
-              setState(() {}), // Trigger rebuild for form validation
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(
-              color: Color(0xFF9CA3AF),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF7B68EE),
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField({
-    required String label,
-    required TextEditingController controller,
-    required bool isVisible,
-    required VoidCallback onVisibilityToggle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF2D3748),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          obscureText: !isVisible,
-          onChanged: (_) =>
-              setState(() {}), // Trigger rebuild for form validation
-          decoration: InputDecoration(
-            hintText: '••••••••',
-            hintStyle: const TextStyle(
-              color: Color(0xFF9CA3AF),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: const Color(0xFFF9FAFB),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE5E7EB),
-                width: 1,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF7B68EE),
-                width: 2,
-              ),
-            ),
-            suffixIcon: IconButton(
-              icon: Icon(
-                isVisible
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                color: const Color(0xFF9CA3AF),
-              ),
-              onPressed: onVisibilityToggle,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

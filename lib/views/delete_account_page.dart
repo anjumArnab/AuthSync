@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/auth_field.dart';
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({super.key});
@@ -173,29 +174,12 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
 
                   const SizedBox(height: 8),
-
-                  TextField(
+                  AuthField(
                     controller: _deleteController,
-                    decoration: InputDecoration(
-                      hintText: 'DELETE',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.red),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      letterSpacing: 1.0,
-                    ),
+                    label: "Type DELETE",
+                    hintText: "Type DELETE to confirm",
+                    obscureText: false,
+                    onChanged: (value) => _validateForm(),
                   ),
 
                   const SizedBox(height: 16),
@@ -211,39 +195,23 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                   ),
 
                   const SizedBox(height: 8),
-
-                  TextField(
+                  AuthField(
+                    label: "Password",
                     controller: _passwordController,
+                    hintText: "Enter your password",
                     obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      hintStyle: TextStyle(color: Colors.grey[400]),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey[600],
                       ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.red),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: Colors.grey[600],
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
                     ),
                   ),
 

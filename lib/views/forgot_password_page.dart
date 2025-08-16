@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/auth_field.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -92,67 +93,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Email Address',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF2D3748),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
+                  AuthField(
+                    label: "Email",
                     controller: _emailController,
+                    hintText: "Enter your email",
                     keyboardType: TextInputType.emailAddress,
                     onChanged: _onEmailChanged,
-                    decoration: InputDecoration(
-                      hintText: 'Enter your email',
-                      hintStyle: const TextStyle(
-                        color: Color(0xFF9CA3AF),
-                        fontSize: 16,
-                      ),
-                      filled: true,
-                      fillColor: const Color(0xFFF9FAFB),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE5E7EB),
-                          width: 1,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE5E7EB),
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF7B68EE),
-                          width: 2,
-                        ),
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFEF4444),
-                          width: 1,
-                        ),
-                      ),
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFEF4444),
-                          width: 2,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return "Email required";
+                      return null;
+                    },
                   ),
                 ],
               ),

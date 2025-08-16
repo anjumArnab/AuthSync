@@ -1,3 +1,4 @@
+import 'package:authsync/widgets/auth_field.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 
@@ -14,9 +15,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  bool _currentPasswordVisible = false;
-  bool _newPasswordVisible = false;
-  bool _confirmPasswordVisible = false;
+  bool _isCurrentPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _isUpdating = false;
 
   // Password validation requirements
@@ -112,37 +113,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
+              AuthField(
                 controller: _currentPasswordController,
-                obscureText: !_currentPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: '••••••••',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                obscureText: !_isCurrentPasswordVisible,
+                hintText: '••••••••',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isCurrentPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF6B73FF),
-                      width: 2,
-                    ),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _currentPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _currentPasswordVisible = !_currentPasswordVisible;
-                      });
-                    },
-                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isCurrentPasswordVisible = !_isCurrentPasswordVisible;
+                    });
+                  },
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -151,7 +137,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   return null;
                 },
               ),
-
               const SizedBox(height: 24),
 
               // New Password
@@ -164,37 +149,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
+              AuthField(
                 controller: _newPasswordController,
-                obscureText: !_newPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: '••••••••',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                obscureText: !_isNewPasswordVisible,
+                hintText: '••••••••',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isNewPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF6B73FF),
-                      width: 2,
-                    ),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _newPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _newPasswordVisible = !_newPasswordVisible;
-                      });
-                    },
-                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isNewPasswordVisible = !_isNewPasswordVisible;
+                    });
+                  },
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -219,37 +189,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
+              AuthField(
                 controller: _confirmPasswordController,
-                obscureText: !_confirmPasswordVisible,
-                decoration: InputDecoration(
-                  hintText: '••••••••',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+                obscureText: !_isConfirmPasswordVisible,
+                hintText: '••••••••',
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey,
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF6B73FF),
-                      width: 2,
-                    ),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _confirmPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _confirmPasswordVisible = !_confirmPasswordVisible;
-                      });
-                    },
-                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/gradient_button.dart';
+import '../widgets/auth_field.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   const PhoneVerificationPage({super.key});
@@ -174,27 +175,16 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
 
                     // Phone Number Input
                     Expanded(
-                      child: TextField(
+                      child: AuthField(
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
-                        onChanged: _onPhoneChanged,
+                        hintText: 'Enter your phone number',
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(10),
+                          LengthLimitingTextInputFormatter(15),
                           _PhoneNumberFormatter(),
                         ],
-                        decoration: const InputDecoration(
-                          hintText: '(555) 123-4567',
-                          hintStyle: TextStyle(
-                            color: Color(0xFF9CA3AF),
-                            fontSize: 16,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                        ),
+                        onChanged: _onPhoneChanged,
                       ),
                     ),
                   ],
