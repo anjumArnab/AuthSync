@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart'; // Import your AuthService
 import '../views/accounts_page.dart';
 import '../views/change_password_page.dart';
 import '../views/update_email_page.dart';
@@ -15,9 +16,35 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final String userName = "John Doe";
-  final String userEmail = "john.doe@example.com";
-  final String userInitials = "JD";
+  final AuthService _authService = AuthService();
+
+  // Dynamic user data
+  String get userName {
+    final email = _authService.getCurrentUserEmail();
+    if (email != null && email.contains('@')) {
+      // Get the part before @ and capitalize first letter of each word
+      final localPart = email.split('@')[0];
+      // Replace dots, underscores, dashes with spaces and capitalize
+      return localPart
+          .replaceAll(RegExp(r'[._-]'), ' ')
+          .split(' ')
+          .map((word) => word.isNotEmpty
+              ? word[0].toUpperCase() + word.substring(1).toLowerCase()
+              : '')
+          .join(' ');
+    }
+    return _authService.getCurrentUserDisplayName() ?? "User";
+  }
+
+  String get userEmail => _authService.getCurrentUserEmail() ?? "";
+
+  String get userInitials {
+    final email = _authService.getCurrentUserEmail();
+    if (email != null && email.length >= 2) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    return "US"; // Default initials
+  }
 
   void _showSignOutDialog() {
     showDialog(
@@ -47,11 +74,23 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _signOut() {
-    // Implement sign out logic here
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Signed out successfully')),
-    );
+  void _signOut() async {
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Signed out successfully')),
+        );
+        // Navigate to login screen or handle navigation as needed
+        // Navigator.of(context).pushReplacementNamed('/login');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign out failed: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   void _navigateToUpdateEmail() {
