@@ -62,8 +62,7 @@ flowchart TD
 
 ### Prerequisites
 - Node.js 14+
-- Firebase Project with Admin SDK
-- Service Account Key
+- Firebase Project with Admin SDK and Service Account Key
 
 ### Installation
 
@@ -148,20 +147,3 @@ final accounts = await authService.getAllStoredAccounts();
 | `AccountStorageService` | Encrypted local storage |
 | `CustomTokenService` | Server communication |
 | `StoredAccount` | Account data model |
-
-## Project Structure
-
-```
-lib/
-├── auth_service.dart           # Main authentication service
-├── multi_account_manager.dart  # Account switching logic
-├── account_storage_service.dart # Local storage management
-├── custom_token_service.dart   # Server communication
-└── models/
-    └── stored_account.dart     # Account data model
-
-server/
-├── server.js                   # Node.js backend
-├── package.json
-└── .env                       # Environment variables
-```
