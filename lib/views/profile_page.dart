@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart'; // Import your AuthService
+import '../services/auth_service.dart';
 import '../views/accounts_page.dart';
 import '../views/change_password_page.dart';
 import '../views/update_email_page.dart';
