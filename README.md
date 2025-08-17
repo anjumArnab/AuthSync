@@ -14,58 +14,48 @@ A comprehensive Flutter authentication app with Firebase integration and custom 
 
 ```mermaid
 flowchart TD
-    subgraph "Multi-Account Storage Flow"
-        A[User Login Success] --> B[AuthService.addCurrentAccountToStorage]
-        B --> C[MultiAccountManager.addCurrentAccountToStorage]
-        C --> D[CustomTokenService.generateCustomToken]
-        D --> E[Node.js Server<br/>POST /api/generateCustomToken]
-        E --> F[Firebase Admin SDK<br/>createCustomToken]
-        F --> G[StoredAccount Object Created]
-        G --> H[AccountStorageService.storeAccount]
-        H --> I[Flutter Secure Storage<br/>Encrypted Save]
-        I --> J[AccountStorageService.setActiveAccount]
-        J --> K[Account Successfully Stored]
-    end
+    A[User Action] --> B{Action Type}
     
-    subgraph "Account Switching Flow"
-        L[Switch Account Request] --> M[AuthService.switchToAccount]
-        M --> N[MultiAccountManager.switchToAccount]
-        N --> O[AccountStorageService.getAccount]
-        O --> P{Token Valid?<br/>isTokenLikelyExpired}
-        
-        P -->|Invalid/Expired| Q[MultiAccountManager._refreshAccountToken]
-        Q --> R[CustomTokenService.generateCustomToken]
-        R --> S[AccountStorageService.updateAccountToken]
-        
-        P -->|Valid| T[Firebase Auth<br/>signInWithCustomToken]
-        S --> T
-        
-        T --> U[AccountStorageService.setActiveAccount]
-        U --> V[AccountStorageService.updateLastUsed]
-        V --> W[Account Switch Complete]
-    end
+    B -->|New Login| C[AuthService.signInWithEmail/Phone/etc]
+    B -->|Switch Account| D[AuthService.switchToAccount]
+    
+    C --> E[Firebase Auth Login]
+    E --> F{Login Success?}
+    F -->|No| G[Return Error]
+    F -->|Yes| H[AuthService.addCurrentAccountToStorage]
+    
+    D --> I[MultiAccountManager.switchToAccount]
+    I --> J[AccountStorageService.getAccount]
+    
+    H --> K[MultiAccountManager.addCurrentAccountToStorage]
+    J --> L{Token Valid?<br/>isTokenLikelyExpired}
+    
+    K --> M[CustomTokenService.generateCustomToken]
+    L -->|Invalid/Expired| M
+    L -->|Valid| N[Firebase Auth<br/>signInWithCustomToken]
+    
+    M --> O[Node.js Server<br/>POST /api/generateCustomToken]
+    O --> P[Firebase Admin SDK<br/>createCustomToken]
+    P --> Q[Token Generated]
+    
+    Q --> R{First Time Storage?}
+    R -->|Yes| S[Create StoredAccount Object]
+    R -->|No| T[AccountStorageService.updateAccountToken]
+    
+    S --> U[AccountStorageService.storeAccount]
+    T --> N
+    U --> V[Flutter Secure Storage<br/>Encrypted Save]
+    
+    V --> W[AccountStorageService.setActiveAccount]
+    N --> W
+    
+    W --> X[AccountStorageService.updateLastUsed]
+    X --> Y[Process Complete]
 
-    style B fill:#e1f5fe
-    style M fill:#e8f5e8
-    style D fill:#fff3e0
-    style Q fill:#fce4ec
-```
-
-## Component Interactions
-
-### 1. **Authentication Flow**
-```
-AuthService → Firebase Auth → CustomTokenService → Node.js Server → StoredAccount
-```
-
-### 2. **Account Switching**
-```
-MultiAccountManager → AccountStorageService → Token Validation → Firebase Auth
-```
-
-### 3. **Token Management**
-```
-Server generates → Client stores → Background cleanup → Auto-refresh
+    style C fill:#e1f5fe
+    style D fill:#e8f5e8  
+    style M fill:#fff3e0
+    style O fill:#fce4ec
 ```
 
 ## Server Setup
