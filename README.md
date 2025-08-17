@@ -14,39 +14,41 @@ A comprehensive Flutter authentication app with Firebase integration and custom 
 
 ```mermaid
 flowchart TD
-    A[User Login] --> B[AuthService]
-    B --> C{Auth Method}
-    
-    C -->|Email/Password| D[Firebase Auth]
-    C -->|Google/Facebook| D
-    C -->|Phone| D
-    
-    D --> E{Login Success?}
-    E -->|No| F[Return Error]
-    E -->|Yes| G[Generate Custom Token]
-    
-    G --> H[CustomTokenService]
-    H --> I[Node.js Server]
-    I --> J[Firebase Admin SDK]
-    J --> K[Custom Token Generated]
-    
-    K --> L[MultiAccountManager]
-    L --> M[Create StoredAccount]
-    M --> N[AccountStorageService]
-    N --> O[Encrypted Storage]
-    
-    O --> P[Account Stored Successfully]
+    subgraph "Multi-Account Storage Flow"
+        A[User Login Success] --> B[AuthService.addCurrentAccountToStorage]
+        B --> C[MultiAccountManager.addCurrentAccountToStorage]
+        C --> D[CustomTokenService.generateCustomToken]
+        D --> E[Node.js Server<br/>POST /api/generateCustomToken]
+        E --> F[Firebase Admin SDK<br/>createCustomToken]
+        F --> G[StoredAccount Object Created]
+        G --> H[AccountStorageService.storeAccount]
+        H --> I[Flutter Secure Storage<br/>Encrypted Save]
+        I --> J[AccountStorageService.setActiveAccount]
+        J --> K[Account Successfully Stored]
+    end
     
     subgraph "Account Switching Flow"
-        Q[Switch Account Request] --> R[MultiAccountManager]
-        R --> S[AccountStorageService]
-        S --> T{Token Valid?}
-        T -->|No| U[Refresh Token via Server]
-        T -->|Yes| V[Sign in with Custom Token]
-        U --> V
-        V --> W[Update Active Account]
-        W --> X[Account Switched]
+        L[Switch Account Request] --> M[AuthService.switchToAccount]
+        M --> N[MultiAccountManager.switchToAccount]
+        N --> O[AccountStorageService.getAccount]
+        O --> P{Token Valid?<br/>isTokenLikelyExpired}
+        
+        P -->|Invalid/Expired| Q[MultiAccountManager._refreshAccountToken]
+        Q --> R[CustomTokenService.generateCustomToken]
+        R --> S[AccountStorageService.updateAccountToken]
+        
+        P -->|Valid| T[Firebase Auth<br/>signInWithCustomToken]
+        S --> T
+        
+        T --> U[AccountStorageService.setActiveAccount]
+        U --> V[AccountStorageService.updateLastUsed]
+        V --> W[Account Switch Complete]
     end
+
+    style B fill:#e1f5fe
+    style M fill:#e8f5e8
+    style D fill:#fff3e0
+    style Q fill:#fce4ec
 ```
 
 ## Component Interactions
