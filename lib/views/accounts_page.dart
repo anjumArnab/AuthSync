@@ -122,16 +122,12 @@ class _AccountsPageState extends State<AccountsPage> {
       return;
     }
 
-    // Show confirmation dialog
-    final confirmed = await _showSwitchConfirmationDialog(selectedAccount);
-    if (!confirmed) return;
-
     setState(() {
       _isSwitching = true;
     });
 
     try {
-      // Switch to the selected account
+      // Switch to the selected account directly without confirmation dialog
       final switchResponse = await _authService.switchToAccountWithFallback(
         selectedAccount.uid,
       );
@@ -187,46 +183,6 @@ class _AccountsPageState extends State<AccountsPage> {
     }
 
     _showErrorSnackBar(message);
-  }
-
-  Future<bool> _showSwitchConfirmationDialog(StoredAccount account) async {
-    return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text('Switch Account'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Switch to ${account.label}?'),
-                  const SizedBox(height: 8),
-                  Text(
-                    account.email,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Switch'),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
   }
 
   Future<void> _removeAccount(StoredAccount account) async {

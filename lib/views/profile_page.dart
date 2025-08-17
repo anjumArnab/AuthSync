@@ -204,26 +204,14 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: IntrinsicHeight(
                     child: Column(
                       children: [
-                        // Header with title and refresh button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SizedBox(
-                                width: 48), // Balance the refresh button
-                            const Text(
-                              'Profile',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.refresh),
-                              onPressed: _loadUserData,
-                              tooltip: 'Refresh Profile',
-                            ),
-                          ],
+                        // Header with title (centered)
+                        const Text(
+                          'Profile',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
 
                         const SizedBox(height: 40),
