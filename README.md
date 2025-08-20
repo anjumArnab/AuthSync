@@ -11,7 +11,7 @@ A comprehensive Flutter authentication app with Firebase integration and custom 
 - **Server Integration**: Node.js backend with Firebase Admin SDK
 
 ## Preview
-[AuthSync](assets/authsync.mp4)
+![AuthSync](assets/authsync.gif)
 
 
 ## Architecture Overview
