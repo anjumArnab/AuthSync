@@ -10,6 +10,9 @@ A comprehensive Flutter authentication app with Firebase integration and custom 
 - **Secure Storage**: Encrypted local storage with automatic token cleanup
 - **Server Integration**: Node.js backend with Firebase Admin SDK
 
+## Preview
+![AuthSync](assets/authsync.gif)
+
 ## Architecture Overview
 
 ```mermaid
