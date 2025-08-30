@@ -1,3 +1,4 @@
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/gradient_button.dart';
@@ -90,8 +91,10 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               setState(() {
                 _isSendingCode = false;
               });
-              _showSnackBar(
-                  'Phone number verified automatically!', Colors.green);
+              /* _showSnackBar(
+                  'Phone number verified automatically!', Colors.green);*/
+              SnackBarHelper.success(
+                  context, 'Phone number verified automatically!');
               Navigator.of(context).pop(); // Go back to previous page
             }
           } catch (e) {
@@ -99,7 +102,8 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               setState(() {
                 _isSendingCode = false;
               });
-              _showSnackBar(e.toString(), Colors.red);
+              //_showSnackBar(e.toString(), Colors.red);
+              SnackBarHelper.error(context, e.toString());
             }
           }
         },
@@ -108,10 +112,12 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
             setState(() {
               _isSendingCode = false;
             });
-            _showSnackBar(
+            /* _showSnackBar(
               e.message ?? 'Phone verification failed',
               Colors.red,
-            );
+            );*/
+            SnackBarHelper.error(
+                context, e.message ?? 'Phone verification failed');
           }
         },
         codeSent: (verificationId, resendToken) {
@@ -136,7 +142,8 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
         setState(() {
           _isSendingCode = false;
         });
-        _showSnackBar(e.toString(), Colors.red);
+        //_showSnackBar(e.toString(), Colors.red);
+        SnackBarHelper.error(context, e.toString());
       }
     }
   }
@@ -288,35 +295,24 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
 
               const SizedBox(height: 32),
 
-              // Send Code Button
+// Send Code Button
               GradientButton(
                 label: _isSendingCode ? 'Sending Code...' : 'Send Code',
                 onTap: (_isPhoneValid && !_isSendingCode)
                     ? _sendVerificationCode
                     : null,
+                child: _isSendingCode
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : null,
               ),
-
-              if (_isSendingCode) ...[
-                const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Sending verification code...',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF6B7280),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
 
               const SizedBox(height: 24),
 
@@ -519,10 +515,12 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                         ),
                       );
                     } else {
-                      _showSnackBar(
+                      /* _showSnackBar(
                         'Verification ID not available. Please try again.',
                         Colors.red,
-                      );
+                      );*/
+                      SnackBarHelper.error(context,
+                          'Verification ID not available. Please try again.');
                     }
                   },
                   style: ElevatedButton.styleFrom(

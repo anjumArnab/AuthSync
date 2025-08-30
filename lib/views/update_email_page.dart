@@ -1,3 +1,4 @@
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/auth_field.dart';
@@ -14,7 +15,7 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final _newEmailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService(); // Initialize AuthService
+  final _authService = AuthService();
 
   String? currentEmail;
   bool _passwordVisible = false;
@@ -44,10 +45,12 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
     // Check if new email is different from current email
     if (_newEmailController.text.trim().toLowerCase() ==
         (currentEmail?.toLowerCase() ?? '')) {
-      _showSnackBar(
+      /* _showSnackBar(
         'New email must be different from current email',
         Colors.orange,
-      );
+      );*/
+      SnackBarHelper.warning(
+          context, 'New email must be different from current email');
       return;
     }
 
@@ -78,26 +81,9 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
         });
 
         // Show error message
-        _showSnackBar(
-          e.toString(),
-          Colors.red,
-        );
+        SnackBarHelper.error(context, e.toString());
       }
     }
-  }
-
-  void _showSnackBar(String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
   }
 
   void _showSuccessDialog() {

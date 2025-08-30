@@ -1,3 +1,4 @@
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../views/forgot_password_page.dart';
 import '../views/create_acc_page.dart';
@@ -48,7 +49,7 @@ class _SignInPageState extends State<SignInPage> {
       if (result != null) {
         // Show success message
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          /* ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
                 'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!',
@@ -57,7 +58,9 @@ class _SignInPageState extends State<SignInPage> {
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),
-          );
+          );*/
+          SnackBarHelper.success(context,
+              'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!');
         }
 
         // Navigate to ProfilePage
@@ -72,7 +75,7 @@ class _SignInPageState extends State<SignInPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*  ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               e.toString(),
@@ -81,7 +84,8 @@ class _SignInPageState extends State<SignInPage> {
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
-        );
+        );*/
+        SnackBarHelper.error(context, e.toString());
       }
     } finally {
       if (mounted) {
@@ -229,18 +233,18 @@ class _SignInPageState extends State<SignInPage> {
                       label: _isLoading ? 'Signing In...' : 'Sign In',
                       isEnabled: !_isLoading,
                       onTap: _isLoading ? null : _signIn,
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : null,
                     ),
-
-                    // Loading indicator
-                    if (_isLoading) ...[
-                      const SizedBox(height: 16),
-                      const Center(
-                        child: CircularProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Color(0xFF7B68EE)),
-                        ),
-                      ),
-                    ],
 
                     const SizedBox(height: 32),
 

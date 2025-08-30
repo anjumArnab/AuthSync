@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../widgets/custom_button.dart';
@@ -109,12 +110,15 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       if (mounted) {
         setState(() => _isSendingEmail = false);
         _startCountdown();
-        _showSnackBar('Verification email sent successfully!', Colors.green);
+        // _showSnackBar('Verification email sent successfully!', Colors.green);
+        SnackBarHelper.success(
+            context, 'Verification email sent successfully!');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSendingEmail = false);
-        _showSnackBar(e.toString(), Colors.red);
+        //_showSnackBar(e.toString(), Colors.red);
+        SnackBarHelper.error(context, e.toString());
       }
     }
   }
@@ -130,15 +134,19 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         if (isVerified) {
           setState(() => _isEmailVerified = true);
         } else {
-          _showSnackBar('Email not verified yet. Please check your inbox.',
-              Colors.orange);
+          //_showSnackBar('Email not verified yet. Please check your inbox.',
+          //   Colors.orange);
+          SnackBarHelper.warning(
+              context, 'Email not verified yet. Please check your inbox.');
         }
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isCheckingVerification = false);
-        _showSnackBar(
-            'Error checking verification: ${e.toString()}', Colors.red);
+        //_showSnackBar(
+        //  'Error checking verification: ${e.toString()}', Colors.red);
+        SnackBarHelper.error(
+            context, 'Error checking verification: ${e.toString()}');
       }
     }
   }

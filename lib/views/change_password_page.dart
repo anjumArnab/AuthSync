@@ -1,4 +1,5 @@
 import 'package:authsync/widgets/auth_field.dart';
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_button.dart';
@@ -59,7 +60,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void> _updatePassword() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_isPasswordValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      /*ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Please ensure your password meets all requirements',
@@ -68,13 +69,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 3),
         ),
-      );
+      );*/
+      SnackBarHelper.warning(
+          context, 'Please ensure your password meets all requirements');
+
       return;
     }
 
     // Check if user is signed in
     if (!_authService.isUserSignedIn()) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      /*ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'Please sign in to change your password',
@@ -83,7 +87,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
         ),
-      );
+      );*/
+      SnackBarHelper.error(context, 'Please sign in to change your password');
+
       return;
     }
 
@@ -100,7 +106,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
       if (mounted) {
         // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
               'Password updated successfully!',
@@ -109,7 +115,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
-        );
+        );*/
+        SnackBarHelper.success(context, 'Password updated successfully!');
 
         // Navigate back after successful update
         Navigator.pop(context);
@@ -117,7 +124,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /* ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               e.toString(),
@@ -126,7 +133,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
-        );
+        );*/
+        SnackBarHelper.error(context, e.toString());
       }
     } finally {
       if (mounted) {

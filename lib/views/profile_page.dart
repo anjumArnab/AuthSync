@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:authsync/views/signin_page.dart';
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../views/accounts_page.dart';
@@ -100,6 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+
                 _signOut();
               },
               child: const Text(
@@ -117,17 +120,21 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await _authService.signOut();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /* ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Signed out successfully')),
+        );*/
+        SnackBarHelper.success(context, 'Signed out successfully');
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SignInPage()),
         );
-        // Navigate to login screen or handle navigation as needed
-        // Navigator.of(context).pushReplacementNamed('/login');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /* ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Sign out failed: ${e.toString()}')),
-        );
+        );*/
+        SnackBarHelper.error(context, 'Sign out failed: ${e.toString()}');
       }
     }
   }

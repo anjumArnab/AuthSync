@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'signin_page.dart';
 import '../widgets/custom_button.dart';
@@ -251,26 +252,28 @@ class _AccountsPageState extends State<AccountsPage> {
 
   void _showSuccessSnackBar(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      /* ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
-      );
+      );*/
+      SnackBarHelper.success(context, message);
     }
   }
 
   void _showErrorSnackBar(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      /*ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
         ),
-      );
+      );*/
+      SnackBarHelper.error(context, message);
     }
   }
 

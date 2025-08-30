@@ -1,3 +1,4 @@
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_button.dart';
@@ -47,7 +48,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
       // Show success message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
               'Account deleted successfully',
@@ -56,7 +57,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             backgroundColor: Colors.green,
             duration: Duration(seconds: 3),
           ),
-        );
+        );*/
+        SnackBarHelper.success(context, 'Account deleted successfully');
       }
 
       // Navigate to sign in page or home (remove all previous routes)
@@ -69,7 +71,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        /*ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
               e.toString(),
@@ -78,7 +80,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 4),
           ),
-        );
+        );*/
+        SnackBarHelper.error(context, e.toString());
       }
     } finally {
       if (mounted) {
