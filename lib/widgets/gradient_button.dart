@@ -4,12 +4,14 @@ class GradientButton extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
   final bool isEnabled;
+  final Widget? child; // 👈 added child
 
   const GradientButton({
     super.key,
     required this.label,
     this.onTap,
     this.isEnabled = true,
+    this.child, // 👈 new param
   });
 
   @override
@@ -65,14 +67,16 @@ class _GradientButtonState extends State<GradientButton> {
               : null,
         ),
         child: Center(
-          child: Text(
-            widget.label,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: widget.isEnabled ? Colors.white : const Color(0xFF9CA3AF),
-            ),
-          ),
+          child: widget.child ??
+              Text(
+                widget.label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color:
+                      widget.isEnabled ? Colors.white : const Color(0xFF9CA3AF),
+                ),
+              ),
         ),
       ),
     );
