@@ -39,9 +39,8 @@ class _AccountsPageState extends State<AccountsPage> {
       final accounts = await _authService.getAllStoredAccounts();
       final activeAccount = await _authService.getActiveStoredAccount();
 
-      // Filter out any null accounts and ensure list is valid
-      final validAccounts =
-          accounts.where((account) => account != null).toList();
+      // Ensure list is valid
+      final validAccounts = accounts.toList();
 
       // Use mounted check before setState to prevent calling setState on disposed widget
       if (!mounted) return;
@@ -322,11 +321,6 @@ class _AccountsPageState extends State<AccountsPage> {
 
                               // Additional null safety check
                               final account = _accounts[index];
-                              if (account == null) {
-                                print(
-                                    'DEBUG: Account at index $index is null - returning empty widget');
-                                return const SizedBox.shrink();
-                              }
 
                               // Use the new AccountCard widget
                               return AccountCard(

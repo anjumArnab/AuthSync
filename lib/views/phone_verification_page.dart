@@ -1,6 +1,6 @@
-import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../widgets/snack_bar_helper.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
 import '../services/auth_service.dart';
@@ -24,7 +24,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   final TextEditingController _phoneController = TextEditingController();
 
   String _selectedCountryCode = '+1';
-  String _selectedCountry = 'US'; // Default to US
   bool _isPhoneValid = false;
   bool _isSendingCode = false;
   String? _verificationId;
@@ -413,7 +412,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                       onTap: () {
                         setState(() {
                           _selectedCountryCode = country['code']!;
-                          _selectedCountry = country['country']!;
                         });
                         Navigator.pop(context);
                       },

@@ -1,5 +1,5 @@
-import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
+import '../widgets/snack_bar_helper.dart';
 import '../views/forgot_password_page.dart';
 import '../views/create_acc_page.dart';
 import '../views/phone_verification_page.dart';

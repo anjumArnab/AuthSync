@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:authsync/views/signin_page.dart';
-import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
+import '../views/signin_page.dart';
+import '../widgets/snack_bar_helper.dart';
 import '../services/auth_service.dart';
 import '../views/accounts_page.dart';
 import '../views/change_password_page.dart';

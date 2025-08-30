@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:authsync/widgets/auth_field.dart';
-import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
+import '../widgets/auth_field.dart';
+import '../widgets/snack_bar_helper.dart';
 import '../services/auth_service.dart';
 import '../widgets/custom_button.dart';
 
