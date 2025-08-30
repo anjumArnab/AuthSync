@@ -304,18 +304,18 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       : (_isResetMode
                           ? _resetPassword
                           : _sendPasswordResetEmail),
+                  child: _isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : null,
                 ),
-
-                // Loading indicator
-                if (_isLoading) ...[
-                  const SizedBox(height: 16),
-                  const Center(
-                    child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Color(0xFF7B68EE)),
-                    ),
-                  ),
-                ],
 
                 const Spacer(),
 
