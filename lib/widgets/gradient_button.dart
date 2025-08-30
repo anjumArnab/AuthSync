@@ -4,14 +4,14 @@ class GradientButton extends StatefulWidget {
   final String label;
   final VoidCallback? onTap;
   final bool isEnabled;
-  final Widget? child; // 👈 added child
+  final Widget? child;
 
   const GradientButton({
     super.key,
     required this.label,
     this.onTap,
     this.isEnabled = true,
-    this.child, // 👈 new param
+    this.child,
   });
 
   @override
