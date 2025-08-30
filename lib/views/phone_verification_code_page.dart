@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +26,13 @@ class PhoneVerificationCodePage extends StatefulWidget {
 }
 
 class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
-  final _authService = AuthService(); // Initialize AuthService
+  final _authService = AuthService();
 
   final List<TextEditingController> _controllers =
       List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
 
-  int _countdown = 60; // Standard 60 seconds
+  int _countdown = 60;
   Timer? _timer;
   bool _isVerifying = false;
   bool _isResending = false;
@@ -101,7 +103,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     String code = _controllers.map((controller) => controller.text).join();
 
     if (code.length != 6) {
-      //_showSnackBar('Please enter the complete 6-digit code', Colors.orange);
       SnackBarHelper.warning(context, 'Please enter the complete 6-digit code');
       return;
     }
@@ -137,11 +138,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
 
         // Clear the input fields for retry
         _clearCodeFields();
-
-        /* _showSnackBar(
-          _getErrorMessage(e.toString()),
-          Colors.red,
-        );*/
         SnackBarHelper.error(context, _getErrorMessage(e.toString()));
       }
     }
@@ -172,7 +168,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             }
           } catch (e) {
             if (mounted) {
-              //_showSnackBar(e.toString(), Colors.red);
               SnackBarHelper.error(context, e.toString());
             }
           }
@@ -182,7 +177,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             setState(() {
               _isResending = false;
             });
-            // _showSnackBar(e.message ?? 'Verification failed', Colors.red);
             SnackBarHelper.error(context, e.message ?? 'Verification failed');
           }
         },
@@ -202,7 +196,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
                 ),
               ),
             );
-            // _showSnackBar('New verification code sent!', Colors.green);
             SnackBarHelper.success(context, 'New verification code sent!');
           }
         },
@@ -219,7 +212,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
         setState(() {
           _isResending = false;
         });
-        // _showSnackBar(e.toString(), Colors.red);
         SnackBarHelper.error(context, e.toString());
       }
     }
@@ -230,20 +222,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
       controller.clear();
     }
     _focusNodes[0].requestFocus();
-  }
-
-  void _showSnackBar(String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
   }
 
   void _showSuccessDialog(String title, String message) {
