@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/custom_button.dart';
@@ -100,7 +101,8 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     String code = _controllers.map((controller) => controller.text).join();
 
     if (code.length != 6) {
-      _showSnackBar('Please enter the complete 6-digit code', Colors.orange);
+      //_showSnackBar('Please enter the complete 6-digit code', Colors.orange);
+      SnackBarHelper.warning(context, 'Please enter the complete 6-digit code');
       return;
     }
 
@@ -136,10 +138,11 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
         // Clear the input fields for retry
         _clearCodeFields();
 
-        _showSnackBar(
+        /* _showSnackBar(
           _getErrorMessage(e.toString()),
           Colors.red,
-        );
+        );*/
+        SnackBarHelper.error(context, _getErrorMessage(e.toString()));
       }
     }
   }
@@ -169,7 +172,8 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             }
           } catch (e) {
             if (mounted) {
-              _showSnackBar(e.toString(), Colors.red);
+              //_showSnackBar(e.toString(), Colors.red);
+              SnackBarHelper.error(context, e.toString());
             }
           }
         },
@@ -178,7 +182,8 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
             setState(() {
               _isResending = false;
             });
-            _showSnackBar(e.message ?? 'Verification failed', Colors.red);
+            // _showSnackBar(e.message ?? 'Verification failed', Colors.red);
+            SnackBarHelper.error(context, e.message ?? 'Verification failed');
           }
         },
         codeSent: (verificationId, resendToken) {
@@ -197,7 +202,8 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
                 ),
               ),
             );
-            _showSnackBar('New verification code sent!', Colors.green);
+            // _showSnackBar('New verification code sent!', Colors.green);
+            SnackBarHelper.success(context, 'New verification code sent!');
           }
         },
         codeAutoRetrievalTimeout: (verificationId) {
@@ -213,7 +219,8 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
         setState(() {
           _isResending = false;
         });
-        _showSnackBar(e.toString(), Colors.red);
+        // _showSnackBar(e.toString(), Colors.red);
+        SnackBarHelper.error(context, e.toString());
       }
     }
   }
