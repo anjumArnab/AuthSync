@@ -8,6 +8,7 @@ class AuthField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final bool filled;
+  final bool? enabled;
   final Color fillColor;
   final Widget? suffixIcon;
   final List<TextInputFormatter>? inputFormatters;
@@ -23,6 +24,7 @@ class AuthField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
     this.filled = true,
+    this.enabled,
     this.fillColor = const Color(0xFFF9FAFB),
     this.suffixIcon,
     this.inputFormatters,
