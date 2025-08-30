@@ -49,9 +49,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   }
 
   bool _isValidPhoneNumber(String phone) {
-    // Remove any non-digit characters for validation
     String digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
-    // Check if it has at least 10 digits (basic validation)
     return digitsOnly.length >= 10;
   }
 
@@ -91,18 +89,15 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               setState(() {
                 _isSendingCode = false;
               });
-              /* _showSnackBar(
-                  'Phone number verified automatically!', Colors.green);*/
               SnackBarHelper.success(
                   context, 'Phone number verified automatically!');
-              Navigator.of(context).pop(); // Go back to previous page
+              Navigator.of(context).pop();
             }
           } catch (e) {
             if (mounted) {
               setState(() {
                 _isSendingCode = false;
               });
-              //_showSnackBar(e.toString(), Colors.red);
               SnackBarHelper.error(context, e.toString());
             }
           }
@@ -112,10 +107,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
             setState(() {
               _isSendingCode = false;
             });
-            /* _showSnackBar(
-              e.message ?? 'Phone verification failed',
-              Colors.red,
-            );*/
             SnackBarHelper.error(
                 context, e.message ?? 'Phone verification failed');
           }
@@ -146,20 +137,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
         SnackBarHelper.error(context, e.toString());
       }
     }
-  }
-
-  void _showSnackBar(String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-    );
   }
 
   @override
@@ -284,8 +261,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                           _PhoneNumberFormatter(),
                         ],
                         onChanged: _onPhoneChanged,
-                        filled:
-                            false, // Remove fill since parent container has background
+                        filled: false,
                         fillColor: Colors.transparent,
                       ),
                     ),
@@ -503,7 +479,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop();
                     if (_verificationId != null) {
                       Navigator.of(context).push(
                         MaterialPageRoute(
@@ -515,10 +491,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                         ),
                       );
                     } else {
-                      /* _showSnackBar(
-                        'Verification ID not available. Please try again.',
-                        Colors.red,
-                      );*/
                       SnackBarHelper.error(context,
                           'Verification ID not available. Please try again.');
                     }

@@ -49,16 +49,6 @@ class _SignInPageState extends State<SignInPage> {
       if (result != null) {
         // Show success message
         if (mounted) {
-          /* ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!',
-                style: const TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );*/
           SnackBarHelper.success(context,
               'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!');
         }
@@ -75,16 +65,6 @@ class _SignInPageState extends State<SignInPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        /*  ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString(),
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );*/
         SnackBarHelper.error(context, e.toString());
       }
     } finally {

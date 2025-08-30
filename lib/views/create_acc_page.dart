@@ -74,16 +74,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
         // Show success message
         if (mounted) {
-          /*ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Account created successfully! Please check your email for verification.',
-                style: TextStyle(color: Colors.white),
-              ),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
-            ),
-          );*/
           SnackBarHelper.success(
             context,
             "Account created successfully! Please check your email for verification.",
@@ -102,16 +92,6 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        /*  ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString(),
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );*/
         SnackBarHelper.error(context, e.toString());
       }
     } finally {

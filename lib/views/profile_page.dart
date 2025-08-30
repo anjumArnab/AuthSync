@@ -120,9 +120,6 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await _authService.signOut();
       if (mounted) {
-        /* ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Signed out successfully')),
-        );*/
         SnackBarHelper.success(context, 'Signed out successfully');
 
         Navigator.of(context).pushReplacement(
@@ -131,9 +128,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } catch (e) {
       if (mounted) {
-        /* ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign out failed: ${e.toString()}')),
-        );*/
         SnackBarHelper.error(context, 'Sign out failed: ${e.toString()}');
       }
     }

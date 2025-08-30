@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -14,10 +16,10 @@ class DeleteAccountPage extends StatefulWidget {
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
   final TextEditingController _deleteController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // Add form key
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isDeleteButtonEnabled = false;
   bool _isPasswordVisible = false;
-  bool _isLoading = false; // Add loading state
+  bool _isLoading = false;
 
   final AuthService _authService = AuthService(); // Initialize AuthService
 
@@ -48,16 +50,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
       // Show success message
       if (mounted) {
-        /*ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              'Account deleted successfully',
-              style: TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );*/
         SnackBarHelper.success(context, 'Account deleted successfully');
       }
 
@@ -71,16 +63,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     } catch (e) {
       // Show error message
       if (mounted) {
-        /*ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString(),
-              style: const TextStyle(color: Colors.white),
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
-          ),
-        );*/
         SnackBarHelper.error(context, e.toString());
       }
     } finally {
@@ -97,7 +79,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing during loading
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(

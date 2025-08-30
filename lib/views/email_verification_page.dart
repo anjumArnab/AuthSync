@@ -110,14 +110,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       if (mounted) {
         setState(() => _isSendingEmail = false);
         _startCountdown();
-        // _showSnackBar('Verification email sent successfully!', Colors.green);
         SnackBarHelper.success(
             context, 'Verification email sent successfully!');
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSendingEmail = false);
-        //_showSnackBar(e.toString(), Colors.red);
         SnackBarHelper.error(context, e.toString());
       }
     }
@@ -134,8 +132,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         if (isVerified) {
           setState(() => _isEmailVerified = true);
         } else {
-          //_showSnackBar('Email not verified yet. Please check your inbox.',
-          //   Colors.orange);
           SnackBarHelper.warning(
               context, 'Email not verified yet. Please check your inbox.');
         }
@@ -143,24 +139,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     } catch (e) {
       if (mounted) {
         setState(() => _isCheckingVerification = false);
-        //_showSnackBar(
-        //  'Error checking verification: ${e.toString()}', Colors.red);
         SnackBarHelper.error(
             context, 'Error checking verification: ${e.toString()}');
       }
     }
-  }
-
-  void _showSnackBar(String message, Color backgroundColor) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
   }
 
   Widget _buildContent() {
