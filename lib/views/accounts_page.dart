@@ -2,7 +2,6 @@
 
 import 'package:authsync/widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
-import 'signin_page.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/account_card.dart';
 import '../services/auth_service.dart';
@@ -89,11 +88,7 @@ class _AccountsPageState extends State<AccountsPage> {
   }
 
   Future<void> _navigateToSignIn() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const SignInPage(),
-      ),
-    );
+    final result = await Navigator.pushNamed(context, '/sign-in');
 
     // If a new account was added, reload the accounts list
     if (result == true) {

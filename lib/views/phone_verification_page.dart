@@ -4,7 +4,6 @@ import '../widgets/snack_bar_helper.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
 import '../services/auth_service.dart';
-import '../views/phone_verification_code_page.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
   final bool
@@ -301,38 +300,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-
-              const SizedBox(height: 24),
-
-              // Help text
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      size: 20,
-                      color: Colors.blue.shade700,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Make sure your phone number is correct. You\'ll receive a 6-digit verification code.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
               const Spacer(),
             ],
           ),
@@ -479,15 +446,12 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     if (_verificationId != null) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => PhoneVerificationCodePage(
-                            phoneNumber: _getFullPhoneNumber(),
-                            verificationId: _verificationId!,
-                            isSignIn: widget.isSignIn,
-                          ),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/phone-verification-code',
+                          arguments: {
+                            'verificationId': _verificationId!,
+                            'phoneNumber': _getFullPhoneNumber(),
+                            'isSignIn': widget.isSignIn,
+                          });
                     } else {
                       SnackBarHelper.error(context,
                           'Verification ID not available. Please try again.');

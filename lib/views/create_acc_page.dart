@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/snack_bar_helper.dart';
-import 'signin_page.dart';
-import 'profile_page.dart';
 import '../services/auth_service.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
@@ -82,11 +80,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
 
         // Navigate to ProfilePage
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const ProfilePage(),
-            ),
-          );
+          Navigator.pushNamed(context, '/profile');
         }
       }
     } catch (e) {
@@ -338,9 +332,7 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                     children: [
                       WidgetSpan(
                         child: GestureDetector(
-                          onTap: () => Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => const SignInPage())),
+                          onTap: () => Navigator.pushNamed(context, '/sign-in'),
                           child: const Text(
                             'Sign In',
                             style: TextStyle(

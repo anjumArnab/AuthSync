@@ -186,16 +186,13 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
               _isResending = false;
             });
             // Update verification ID for the new code
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PhoneVerificationCodePage(
-                  verificationId: verificationId,
-                  phoneNumber: widget.phoneNumber,
-                  isSignIn: widget.isSignIn,
-                ),
-              ),
-            );
+
+            Navigator.pushNamed(context, '/phone-verification-code',
+                arguments: {
+                  'verificationId': verificationId,
+                  'phoneNumber': widget.phoneNumber,
+                  'isSignIn': widget.isSignIn,
+                });
             SnackBarHelper.success(context, 'New verification code sent!');
           }
         },

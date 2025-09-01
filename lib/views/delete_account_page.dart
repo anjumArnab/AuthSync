@@ -56,7 +56,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       // Navigate to sign in page or home (remove all previous routes)
       if (mounted) {
         Navigator.of(context).pushNamedAndRemoveUntil(
-          '/signin', // Adjust this route name based on your navigation setup
+          '/signin',
           (Route<dynamic> route) => false,
         );
       }

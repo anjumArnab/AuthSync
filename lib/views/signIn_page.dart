@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/snack_bar_helper.dart';
-import '../views/forgot_password_page.dart';
-import '../views/create_acc_page.dart';
-import '../views/phone_verification_page.dart';
-import '../views/profile_page.dart';
 import '../services/auth_service.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
@@ -55,11 +51,8 @@ class _SignInPageState extends State<SignInPage> {
 
         // Navigate to ProfilePage
         if (mounted) {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const ProfilePage(),
-            ),
-          );
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/profile', (Route<dynamic> route) => false);
         }
       }
     } catch (e) {
@@ -189,11 +182,7 @@ class _SignInPageState extends State<SignInPage> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordPage(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/forgot-password');
                         },
                         child: const Text(
                           'Forgot Password?',
@@ -271,11 +260,8 @@ class _SignInPageState extends State<SignInPage> {
                       icon: Icons.phone_android,
                       iconColor: const Color(0xFF10B981),
                       text: 'Continue with Phone',
-                      onTap: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const PhoneVerificationPage(),
-                        ),
-                      ),
+                      onTap: () => Navigator.of(context)
+                          .pushNamed('/phone-verification'),
                     ),
 
                     // Flexible spacer that grows to push content to bottom
@@ -295,13 +281,8 @@ class _SignInPageState extends State<SignInPage> {
                           children: [
                             WidgetSpan(
                               child: GestureDetector(
-                                onTap: () =>
-                                    Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const CreateAccountPage(),
-                                  ),
-                                ),
+                                onTap: () => Navigator.pushNamed(
+                                    context, '/create-account'),
                                 child: const Text(
                                   'Sign Up',
                                   style: TextStyle(

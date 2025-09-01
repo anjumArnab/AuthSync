@@ -1,14 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../views/signin_page.dart';
 import '../widgets/snack_bar_helper.dart';
 import '../services/auth_service.dart';
-import '../views/accounts_page.dart';
-import '../views/change_password_page.dart';
-import '../views/update_email_page.dart';
-import '../views/delete_account_page.dart';
-import '../views/email_verification_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -121,9 +115,10 @@ class _ProfilePageState extends State<ProfilePage> {
       await _authService.signOut();
       if (mounted) {
         SnackBarHelper.success(context, 'Signed out successfully');
-
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const SignInPage()),
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/sign-in',
+          (Route<dynamic> route) => false,
         );
       }
     } catch (e) {
@@ -134,11 +129,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _navigateToUpdateEmail() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const UpdateEmailPage(),
-      ),
-    );
+    final result = Navigator.pushNamed(context, '/update-email');
 
     // Refresh user data if email was updated
     if (result == true) {
@@ -147,27 +138,15 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _navigateToChangePassword() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const ChangePasswordPage(),
-      ),
-    );
+    Navigator.pushNamed(context, '/change-password');
   }
 
   void _navigateToEmailVerification() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const EmailVerificationPage(),
-      ),
-    );
+    Navigator.pushNamed(context, '/verify-email');
   }
 
   void _navigateToMultipleAccounts() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AccountsPage(),
-      ),
-    );
+    final result = await Navigator.pushNamed(context, '/account');
 
     // If account was switched, refresh the profile page
     if (result == true) {
@@ -176,11 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _navigateToDeleteAccount() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const DeleteAccountPage(),
-      ),
-    );
+    Navigator.pushNamed(context, '/delete-account');
   }
 
   @override

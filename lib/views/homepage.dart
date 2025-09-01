@@ -1,8 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../views/create_acc_page.dart';
-import 'signin_page.dart';
 import '../widgets/gradient_button.dart';
 
 class Homepage extends StatefulWidget {
@@ -90,10 +88,7 @@ class _HomepageState extends State<Homepage> {
               GradientButton(
                 label: 'Get Started',
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => const CreateAccountPage()),
-                  );
+                  Navigator.pushNamed(context, '/create-account');
                 },
               ),
 
@@ -111,11 +106,7 @@ class _HomepageState extends State<Homepage> {
                     children: [
                       WidgetSpan(
                         child: GestureDetector(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const SignInPage(),
-                            ),
-                          ),
+                          onTap: () => Navigator.pushNamed(context, '/sign-in'),
                           child: const Text(
                             'Sign In',
                             style: TextStyle(
