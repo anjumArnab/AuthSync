@@ -3,6 +3,8 @@ import '../services/password_reset_manager.dart';
 import '../services/app_link_service.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
+import '../widgets/custom_button.dart';
+import '../widgets/snack_bar_helper.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   final String? resetToken; // Pass token if opened via app link
@@ -18,7 +20,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  // Separate keys for different modes
+  final GlobalKey<FormState> _emailFormKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
 
   bool _isEmailValid = false;
   bool _isPasswordValid = false;
@@ -39,9 +44,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     String? token = widget.resetToken;
 
     // If no token passed, check for initial app link
-    if (token == null) {
-      token = await AppLinkService.instance.getInitialResetToken();
-    }
+    token ??= await AppLinkService.instance.getInitialResetToken();
 
     if (token != null) {
       await _verifyTokenAndEnterResetMode(token);
@@ -69,15 +72,23 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           _verifiedEmail = result['email'];
           _currentResetToken = token;
           _isLoading = false;
+          // Create new form key for reset mode to avoid GlobalKey conflicts
+          _passwordFormKey = GlobalKey<FormState>();
         });
       } else {
-        _showError('Invalid or expired reset link');
+        SnackBarHelper.error(
+          context,
+          'Invalid or expired reset link',
+        );
         setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
-      _showError('Failed to verify reset link');
+      SnackBarHelper.error(
+        context,
+        'Failed to verify reset link',
+      );
       setState(() {
         _isLoading = false;
       });
@@ -111,7 +122,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _sendPasswordResetEmail() async {
-    if (!_formKey.currentState!.validate() || !_isEmailValid) return;
+    if (!_emailFormKey.currentState!.validate() || !_isEmailValid) return;
 
     setState(() {
       _isLoading = true;
@@ -125,10 +136,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (success) {
         _showResetLinkSentDialog();
       } else {
-        _showError('Failed to send reset email. Please try again.');
+        SnackBarHelper.error(
+          context,
+          'Failed to send reset email. Please try again.',
+        );
       }
     } catch (e) {
-      _showError('An error occurred. Please try again.');
+      SnackBarHelper.error(
+        context,
+        'An error occurred. Please try again.',
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -137,7 +154,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _resetPassword() async {
-    if (!_formKey.currentState!.validate() ||
+    if (!_passwordFormKey.currentState!.validate() ||
         !_isPasswordValid ||
         _currentResetToken == null) return;
 
@@ -154,10 +171,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (success) {
         _showPasswordResetSuccessDialog();
       } else {
-        _showError('Failed to reset password. Please try again.');
+        SnackBarHelper.error(
+          context,
+          'Failed to reset password. Please try again.',
+        );
       }
     } catch (e) {
-      _showError('An error occurred. Please try again.');
+      SnackBarHelper.error(
+        context,
+        'An error occurred. Please try again.',
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -190,7 +213,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
       body: SafeArea(
         child: Form(
-          key: _formKey,
+          // Use different form keys for different modes
+          key: _isResetMode ? _passwordFormKey : _emailFormKey,
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -345,18 +369,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
-  void _showError(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message, style: const TextStyle(color: Colors.white)),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        ),
-      );
-    }
-  }
-
   void _showResetLinkSentDialog() {
     showDialog(
       context: context,
@@ -410,27 +422,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
-                    Navigator.of(context).pop(); // Go back to previous page
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B68EE),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Got it',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
+              CustomButton(
+                label: 'Got it',
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Go back to previous page
+                },
+              )
             ],
           ),
         );
@@ -491,27 +489,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
-                    Navigator.of(context).pop(); // Go back to sign in
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B68EE),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
+              CustomButton(
+                label: 'Sign In',
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Go back to sign in
+                },
+              )
             ],
           ),
         );
