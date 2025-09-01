@@ -30,8 +30,8 @@ class AppLinkService {
     print('Received app link: $uri');
 
     // Check if it's a password reset link
-    if (uri.path == '/reset-password' ||
-        uri.pathSegments.contains('reset-password')) {
+    if (uri.path == '/forgot-password' ||
+        uri.pathSegments.contains('forgot-password')) {
       final token = uri.queryParameters['token'];
       if (token != null && onResetPasswordLink != null) {
         onResetPasswordLink!(token);
@@ -45,8 +45,8 @@ class AppLinkService {
       final uri = await _appLinks.getInitialLink();
       if (uri != null) {
         print('Initial app link: $uri');
-        if (uri.path == '/reset-password' ||
-            uri.pathSegments.contains('reset-password')) {
+        if (uri.path == '/forgot-password' ||
+            uri.pathSegments.contains('forgot-password')) {
           return uri.queryParameters['token'];
         }
       }
