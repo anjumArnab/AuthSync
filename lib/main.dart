@@ -15,15 +15,21 @@ import '../views/phone_verification_code_page.dart';
 import '../views/phone_verification_page.dart';
 import '../views/signin_page.dart';
 import '../views/update_email_page.dart';
+import '../services/app_link_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Initialize AppLinkService
+  AppLinkService.instance.initialize();
+
   runApp(const AuthSync());
 }
 
 class AuthSync extends StatelessWidget {
   const AuthSync({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -56,8 +62,40 @@ class AuthSync extends StatelessWidget {
   }
 }
 
-class AuthCheck extends StatelessWidget {
+class AuthCheck extends StatefulWidget {
   const AuthCheck({super.key});
+
+  @override
+  State<AuthCheck> createState() => _AuthCheckState();
+}
+
+class _AuthCheckState extends State<AuthCheck> {
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialLink();
+    _setupAppLinkHandler();
+  }
+
+  // Check for initial app link when app starts
+  Future<void> _checkInitialLink() async {
+    final token = await AppLinkService.instance.getInitialResetToken();
+    if (token != null && mounted) {
+      // Navigate to forgot password page with the token
+      Navigator.of(context).pushNamed('/forgot-password', arguments: token);
+    }
+  }
+
+  // Setup app link handler for incoming links
+  void _setupAppLinkHandler() {
+    AppLinkService.instance.onResetPasswordLink = (String token) {
+      if (mounted) {
+        // Navigate to forgot password page with the token
+        Navigator.of(context).pushNamed('/forgot-password', arguments: token);
+      }
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -75,5 +113,11 @@ class AuthCheck extends StatelessWidget {
         }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    AppLinkService.instance.dispose();
+    super.dispose();
   }
 }
