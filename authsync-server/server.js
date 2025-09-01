@@ -161,7 +161,7 @@ app.post('/api/sendPasswordReset', passwordResetLimiter, async (req, res) => {
     });
 
     // Create deep link URL
-    const deepLinkUrl = `${process.env.APP_SCHEME || 'myapp'}://reset-password?token=${resetToken}`;
+    const deepLinkUrl = `${process.env.APP_SCHEME || 'myapp'}://forgot-password?token=${resetToken}`;
 
     // Email content
     const emailHtml = `
