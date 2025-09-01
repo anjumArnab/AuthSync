@@ -15,6 +15,7 @@ class AuthField extends StatelessWidget {
   final EdgeInsetsGeometry contentPadding;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final String? errorText;
 
   const AuthField({
     super.key,
@@ -32,6 +33,7 @@ class AuthField extends StatelessWidget {
         const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.validator,
     this.onChanged,
+    this.errorText,
   });
 
   @override
@@ -57,6 +59,7 @@ class AuthField extends StatelessWidget {
           inputFormatters: inputFormatters,
           onChanged: onChanged,
           validator: validator,
+          enabled: enabled,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: const TextStyle(
@@ -87,6 +90,13 @@ class AuthField extends StatelessWidget {
             ),
             suffixIcon: suffixIcon,
             contentPadding: contentPadding,
+            errorText: errorText, // Use errorText for manual error display
+            errorStyle: const TextStyle(
+              color: Colors.red,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
+            errorMaxLines: 2, // Allow multi-line error messages
           ),
         ),
       ],
