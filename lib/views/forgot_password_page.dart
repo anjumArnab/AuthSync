@@ -21,16 +21,17 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  // Separate keys for different modes
-  final GlobalKey<FormState> _emailFormKey = GlobalKey<FormState>();
-  GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
-
   bool _isEmailValid = false;
   bool _isPasswordValid = false;
   bool _isLoading = false;
   bool _isResetMode = false; // true when user came from app link
   String? _verifiedEmail;
   String? _currentResetToken;
+
+  // Validation states for manual validation
+  String? _emailError;
+  String? _passwordError;
+  String? _confirmPasswordError;
 
   @override
   void initState() {
@@ -72,8 +73,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           _verifiedEmail = result['email'];
           _currentResetToken = token;
           _isLoading = false;
-          // Create new form key for reset mode to avoid GlobalKey conflicts
-          _passwordFormKey = GlobalKey<FormState>();
+          // Clear any existing errors when switching modes
+          _clearValidationErrors();
         });
       } else {
         SnackBarHelper.error(
@@ -108,21 +109,99 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     return RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email);
   }
 
+  void _clearValidationErrors() {
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+      _confirmPasswordError = null;
+    });
+  }
+
+  // Manual validation methods
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Email is required";
+    }
+    if (!_isValidEmail(value.trim())) {
+      return "Please enter a valid email address";
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Password is required";
+    }
+    if (value.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+    return null;
+  }
+
+  String? _validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Please confirm your password";
+    }
+    if (value != _passwordController.text) {
+      return "Passwords don't match";
+    }
+    return null;
+  }
+
   void _onEmailChanged(String value) {
     setState(() {
-      _isEmailValid = value.isNotEmpty && _isValidEmail(value);
+      _emailError = _validateEmail(value);
+      _isEmailValid = _emailError == null && value.isNotEmpty;
     });
   }
 
   void _onPasswordChanged(String value) {
     setState(() {
-      _isPasswordValid = value.length >= 6 &&
-          _passwordController.text == _confirmPasswordController.text;
+      _passwordError = _validatePassword(value);
+      _confirmPasswordError =
+          _validateConfirmPassword(_confirmPasswordController.text);
+      _isPasswordValid = _passwordError == null &&
+          _confirmPasswordError == null &&
+          value.isNotEmpty &&
+          _confirmPasswordController.text.isNotEmpty;
     });
   }
 
+  void _onConfirmPasswordChanged(String value) {
+    setState(() {
+      _confirmPasswordError = _validateConfirmPassword(value);
+      _isPasswordValid = _passwordError == null &&
+          _confirmPasswordError == null &&
+          _passwordController.text.isNotEmpty &&
+          value.isNotEmpty;
+    });
+  }
+
+  bool _validateCurrentForm() {
+    if (!_isResetMode) {
+      // Email mode validation
+      final emailError = _validateEmail(_emailController.text);
+      setState(() {
+        _emailError = emailError;
+      });
+      return emailError == null;
+    } else {
+      // Password reset mode validation
+      final passwordError = _validatePassword(_passwordController.text);
+      final confirmPasswordError =
+          _validateConfirmPassword(_confirmPasswordController.text);
+
+      setState(() {
+        _passwordError = passwordError;
+        _confirmPasswordError = confirmPasswordError;
+      });
+
+      return passwordError == null && confirmPasswordError == null;
+    }
+  }
+
   Future<void> _sendPasswordResetEmail() async {
-    if (!_emailFormKey.currentState!.validate() || !_isEmailValid) return;
+    if (!_validateCurrentForm() || !_isEmailValid) return;
 
     setState(() {
       _isLoading = true;
@@ -154,7 +233,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   }
 
   Future<void> _resetPassword() async {
-    if (!_passwordFormKey.currentState!.validate() ||
+    if (!_validateCurrentForm() ||
         !_isPasswordValid ||
         _currentResetToken == null) return;
 
@@ -212,157 +291,124 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         centerTitle: true,
       ),
       body: SafeArea(
-        child: Form(
-          // Use different form keys for different modes
-          key: _isResetMode ? _passwordFormKey : _emailFormKey,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 40),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
 
-                // Lock Icon with Yellow Background
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Icon(
-                    _isResetMode ? Icons.lock_reset : Icons.lock_outline,
-                    color: const Color(0xFFF59E0B),
-                    size: 32,
-                  ),
+              // Lock Icon with Yellow Background
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                child: Icon(
+                  _isResetMode ? Icons.lock_reset : Icons.lock_outline,
+                  color: const Color(0xFFF59E0B),
+                  size: 32,
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Description Text
+              Text(
+                _isResetMode
+                    ? "Enter your new password for\n${_verifiedEmail ?? 'your account'}"
+                    : "Enter your email address and we'll send you a reset link",
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 40),
+
+              // Fields based on mode
+              if (!_isResetMode) ...[
+                // Email Mode - Send Reset Link
+                AuthField(
+                  label: "Email",
+                  controller: _emailController,
+                  hintText: "Enter your email",
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: _onEmailChanged,
+                  errorText: _emailError,
+                ),
+              ] else ...[
+                // Reset Mode - Enter New Password
+                AuthField(
+                  label: "New Password",
+                  controller: _passwordController,
+                  hintText: "Enter new password",
+                  obscureText: true,
+                  onChanged: _onPasswordChanged,
+                  errorText: _passwordError,
                 ),
 
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
 
-                // Description Text
-                Text(
-                  _isResetMode
-                      ? "Enter your new password for\n${_verifiedEmail ?? 'your account'}"
-                      : "Enter your email address and we'll send you a reset link",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF6B7280),
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
+                AuthField(
+                  label: "Confirm New Password",
+                  controller: _confirmPasswordController,
+                  hintText: "Confirm new password",
+                  obscureText: true,
+                  onChanged: _onConfirmPasswordChanged,
+                  errorText: _confirmPasswordError,
                 ),
-
-                const SizedBox(height: 40),
-
-                // Fields based on mode
-                if (!_isResetMode) ...[
-                  // Email Mode - Send Reset Link
-                  AuthField(
-                    label: "Email",
-                    controller: _emailController,
-                    hintText: "Enter your email",
-                    keyboardType: TextInputType.emailAddress,
-                    onChanged: _onEmailChanged,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Email is required";
-                      }
-                      if (!_isValidEmail(value.trim())) {
-                        return "Please enter a valid email address";
-                      }
-                      return null;
-                    },
-                  ),
-                ] else ...[
-                  // Reset Mode - Enter New Password
-                  AuthField(
-                    label: "New Password",
-                    controller: _passwordController,
-                    hintText: "Enter new password",
-                    obscureText: true,
-                    onChanged: (_) =>
-                        _onPasswordChanged(_passwordController.text),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Password is required";
-                      }
-                      if (value.length < 6) {
-                        return "Password must be at least 6 characters";
-                      }
-                      return null;
-                    },
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  AuthField(
-                    label: "Confirm New Password",
-                    controller: _confirmPasswordController,
-                    hintText: "Confirm new password",
-                    obscureText: true,
-                    onChanged: (_) =>
-                        _onPasswordChanged(_confirmPasswordController.text),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please confirm your password";
-                      }
-                      if (value != _passwordController.text) {
-                        return "Passwords don't match";
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-
-                const SizedBox(height: 32),
-
-                // Action Button
-                GradientButton(
-                  label: _isLoading
-                      ? (_isResetMode ? 'Resetting...' : 'Sending...')
-                      : (_isResetMode ? 'Reset Password' : 'Send Reset Link'),
-                  isEnabled:
-                      (_isResetMode ? _isPasswordValid : _isEmailValid) &&
-                          !_isLoading,
-                  onTap: _isLoading
-                      ? null
-                      : (_isResetMode
-                          ? _resetPassword
-                          : _sendPasswordResetEmail),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
-                      : null,
-                ),
-
-                const Spacer(),
-
-                // Back to Sign In Link
-                TextButton(
-                  onPressed: _isLoading
-                      ? null
-                      : () {
-                          Navigator.of(context).pop();
-                        },
-                  child: const Text(
-                    'Back to Sign In',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF7B68EE),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
               ],
-            ),
+
+              const SizedBox(height: 32),
+
+              // Action Button
+              GradientButton(
+                label: _isLoading
+                    ? (_isResetMode ? 'Resetting...' : 'Sending...')
+                    : (_isResetMode ? 'Reset Password' : 'Send Reset Link'),
+                isEnabled: (_isResetMode ? _isPasswordValid : _isEmailValid) &&
+                    !_isLoading,
+                onTap: _isLoading
+                    ? null
+                    : (_isResetMode ? _resetPassword : _sendPasswordResetEmail),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : null,
+              ),
+
+              const Spacer(),
+
+              // Back to Sign In Link
+              TextButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        Navigator.of(context).pop();
+                      },
+                child: const Text(
+                  'Back to Sign In',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF7B68EE),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
