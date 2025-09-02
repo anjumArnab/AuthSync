@@ -1,4 +1,3 @@
-import 'package:authsync/services/password_reset_manager.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'multi_account_manager.dart';
 import 'account_storage_service.dart';
@@ -268,10 +267,7 @@ class AuthService {
   // Forgot Password
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
-      final success = await PasswordResetManager.sendPasswordResetEmail(email);
-      if (!success) {
-        throw Exception('Failed to send password reset email');
-      }
+      await _auth.sendPasswordResetEmail(email: email);
     } catch (e) {
       throw Exception('Password reset email failed: ${e.toString()}');
     }
