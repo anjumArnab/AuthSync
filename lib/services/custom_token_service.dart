@@ -1,52 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
-
-class CustomTokenResponse {
-  final bool success;
-  final String? customToken;
-  final String? error;
-  final String? message;
-
-  CustomTokenResponse({
-    required this.success,
-    this.customToken,
-    this.error,
-    this.message,
-  });
-
-  factory CustomTokenResponse.fromJson(Map<String, dynamic> json) {
-    return CustomTokenResponse(
-      success: json['success'] ?? false,
-      customToken: json['customToken'],
-      error: json['error'],
-      message: json['message'],
-    );
-  }
-}
-
-class UserProfileResponse {
-  final bool success;
-  final Map<String, dynamic>? user;
-  final String? error;
-  final String? message;
-
-  UserProfileResponse({
-    required this.success,
-    this.user,
-    this.error,
-    this.message,
-  });
-
-  factory UserProfileResponse.fromJson(Map<String, dynamic> json) {
-    return UserProfileResponse(
-      success: json['success'] ?? false,
-      user: json['user'],
-      error: json['error'],
-      message: json['message'],
-    );
-  }
-}
+import '../models/custom_token_response.dart';
+import '../models/user_profile_response.dart';
 
 class CustomTokenService {
   static const String _baseUrl = 'http://localhost:3000/api';

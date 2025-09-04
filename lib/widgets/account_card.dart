@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import '../services/account_storage_service.dart';
 import '../services/auth_service.dart';
+import '../models/stored_account.dart';
 
 class AccountCard extends StatelessWidget {
   final StoredAccount account;

@@ -1,11 +1,13 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:authsync/widgets/snack_bar_helper.dart';
+import 'package:authsync/models/account_switching_response..dart';
+
+import '../models/stored_account.dart';
+import '../widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/account_card.dart';
 import '../services/auth_service.dart';
-import '../services/account_storage_service.dart';
 import '../services/multi_account_manager.dart';
 
 class AccountsPage extends StatefulWidget {

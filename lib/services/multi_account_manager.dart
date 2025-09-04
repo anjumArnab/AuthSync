@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'account_storage_service.dart';
 import 'custom_token_service.dart';
+import '../models/account_switching_response..dart';
+import '../models/stored_account.dart';
 
 enum AccountSwitchResult {
   success,
@@ -9,18 +11,6 @@ enum AccountSwitchResult {
   networkError,
   userNotFound,
   unknownError,
-}
-
-class AccountSwitchResponse {
-  final AccountSwitchResult result;
-  final String? message;
-  final StoredAccount? account;
-
-  AccountSwitchResponse({
-    required this.result,
-    this.message,
-    this.account,
-  });
 }
 
 class MultiAccountManager {

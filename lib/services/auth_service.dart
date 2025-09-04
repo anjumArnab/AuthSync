@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'multi_account_manager.dart';
-import 'account_storage_service.dart';
+import '../models/account_switching_response..dart';
+import '../models/stored_account.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
