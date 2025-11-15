@@ -156,7 +156,7 @@ class AccountStorageService {
     }
   }
 
-  // Get accounts sorted by last used (most recent first)
+  // Get accounts sorted by last used
   Future<List<StoredAccount>> getAccountsSortedByLastUsed() async {
     try {
       final accounts = await getAllAccounts();
@@ -212,7 +212,7 @@ class AccountStorageService {
     }
   }
 
-  // Clean up expired tokens (tokens older than 50 minutes)
+  // Clean up expired tokens older than 50 minutes
   Future<void> cleanupExpiredTokens() async {
     try {
       final accounts = await getAllAccounts();
