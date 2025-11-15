@@ -5,7 +5,8 @@ import '../models/custom_token_response.dart';
 import '../models/user_profile_response.dart';
 
 class CustomTokenService {
-  static const String _baseUrl = 'http://localhost:3000/api';
+  static const String _baseUrl =
+      'http://localhost:3000/api'; // for android virtual device 'http://10.0.2.2:3000/api';
   static const Duration _timeout = Duration(seconds: 30);
 
   // Generate custom token for a user
@@ -108,27 +109,7 @@ class CustomTokenService {
     }
   }
 
-  // Validate custom token format (basic validation)
-  static bool isValidCustomTokenFormat(String token) {
-    try {
-      // Basic JWT format validation (3 parts separated by dots)
-      final parts = token.split('.');
-      if (parts.length != 3) return false;
-
-      // Check if parts are base64 encoded
-      for (final part in parts) {
-        if (part.isEmpty) return false;
-        // Try to decode base64
-        base64Url.decode(base64Url.normalize(part));
-      }
-
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  // Extract user information from custom token (without verification)
+  // Extract user information from custom token
   static Map<String, dynamic>? extractTokenPayload(String token) {
     try {
       final parts = token.split('.');
@@ -156,38 +137,5 @@ class CustomTokenService {
     } catch (e) {
       return true;
     }
-  }
-
-  // Generate custom token with retry logic
-  static Future<CustomTokenResponse> generateCustomTokenWithRetry(
-    String uid, {
-    int maxRetries = 3,
-  }) async {
-    int attempts = 0;
-
-    while (attempts < maxRetries) {
-      attempts++;
-
-      final response = await generateCustomToken(uid);
-
-      if (response.success) {
-        return response;
-      }
-
-      // If it's a network error and we haven't reached max retries, try again
-      if (response.error == 'NetworkError' && attempts < maxRetries) {
-        await Future.delayed(
-            Duration(seconds: attempts * 2)); // Exponential backoff
-        continue;
-      }
-
-      return response;
-    }
-
-    return CustomTokenResponse(
-      success: false,
-      error: 'MaxRetriesExceeded',
-      message: 'Failed to generate custom token after $maxRetries attempts',
-    );
   }
 }
