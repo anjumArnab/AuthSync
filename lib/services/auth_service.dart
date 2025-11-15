@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'multi_account_manager.dart';
-import '../models/account_switching_response..dart';
+import '../models/account_switching_response.dart';
 import '../models/stored_account.dart';
 
 class AuthService {
@@ -60,7 +60,7 @@ class AuthService {
     }
   }
 
-  // Sign In with Phone Number (requires verification)
+  // Sign In with Phone Number
   Future<void> signInWithPhone({
     required String phoneNumber,
     required Function(PhoneAuthCredential) verificationCompleted,
@@ -132,7 +132,7 @@ class AuthService {
     }
   }
 
-  // Create Account (Sign Up)
+  // Create Account
   Future<UserCredential?> createAccount({
     required String email,
     required String password,
@@ -151,7 +151,7 @@ class AuthService {
         await result.user?.updateDisplayName(displayName);
       }
 
-      // Add to multi-account storage if requested
+      // Add to multi-account storage if addToStorage is true
       if (addToStorage && result.user != null) {
         try {
           await _multiAccountManager.addCurrentAccountToStorage(
@@ -248,7 +248,7 @@ class AuthService {
       );
       await user.reauthenticateWithCredential(credential);
 
-      // Remove from storage first
+      // Remove from storage
       try {
         await _multiAccountManager.removeAccount(uid);
       } catch (e) {
@@ -271,53 +271,6 @@ class AuthService {
       await _auth.sendPasswordResetEmail(email: email);
     } catch (e) {
       throw Exception('Password reset email failed: ${e.toString()}');
-    }
-  }
-
-  // Phone Verification Code (Start verification process)
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required Function(PhoneAuthCredential) verificationCompleted,
-    required Function(FirebaseAuthException) verificationFailed,
-    required Function(String, int?) codeSent,
-    required Function(String) codeAutoRetrievalTimeout,
-  }) async {
-    try {
-      await _auth.verifyPhoneNumber(
-        phoneNumber: phoneNumber,
-        verificationCompleted: verificationCompleted,
-        verificationFailed: verificationFailed,
-        codeSent: codeSent,
-        codeAutoRetrievalTimeout: codeAutoRetrievalTimeout,
-        timeout: const Duration(seconds: 60),
-      );
-    } catch (e) {
-      throw Exception('Phone verification failed: ${e.toString()}');
-    }
-  }
-
-  // Verify phone with SMS code
-  Future<UserCredential?> verifyPhoneWithCode({
-    required String verificationId,
-    required String smsCode,
-  }) async {
-    try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: smsCode,
-      );
-
-      // If user is already signed in, link the phone number
-      if (_auth.currentUser != null) {
-        return await _auth.currentUser!.linkWithCredential(credential);
-      } else {
-        // Otherwise, sign in with phone credential
-        return await _auth.signInWithCredential(credential);
-      }
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthError(e);
-    } catch (e) {
-      throw Exception('Phone verification failed: ${e.toString()}');
     }
   }
 
@@ -348,17 +301,16 @@ class AuthService {
 
     // Reload user to get the latest verification status
     await user.reload();
-    return _auth.currentUser?.emailVerified ?? false;
+    return user.emailVerified;
   }
 
-  // Sign Out (Enhanced with multi-account support)
+  // Sign Out
   Future<void> signOut({bool clearActiveAccount = true}) async {
     try {
       await _auth.signOut();
 
       if (clearActiveAccount) {
-        await _multiAccountManager
-            .clearActiveAccount(); // FIXED: use public method
+        await _multiAccountManager.clearActiveAccount();
       }
     } catch (e) {
       throw Exception('Sign out failed: ${e.toString()}');
@@ -481,84 +433,5 @@ class AuthService {
   // Get current user display name
   String? getCurrentUserDisplayName() {
     return _auth.currentUser?.displayName;
-  }
-
-  // Get current user phone number
-  String? getCurrentUserPhoneNumber() {
-    return _auth.currentUser?.phoneNumber;
-  }
-
-  // Update display name
-  Future<void> updateDisplayName({required String displayName}) async {
-    try {
-      User? user = _auth.currentUser;
-      if (user == null) {
-        throw Exception('No user is currently signed in');
-      }
-
-      await user.updateDisplayName(displayName);
-
-      // Sync account data after display name change
-      await _multiAccountManager.syncCurrentUserData();
-    } catch (e) {
-      throw Exception('Display name update failed: ${e.toString()}');
-    }
-  }
-
-  // Reload current user
-  Future<void> reloadUser() async {
-    try {
-      await _auth.currentUser?.reload();
-
-      // Sync account data after reload
-      if (_auth.currentUser != null) {
-        await _multiAccountManager.syncCurrentUserData();
-      }
-    } catch (e) {
-      throw Exception('User reload failed: ${e.toString()}');
-    }
-  }
-
-  // Initialize multi-account functionality (call this on app startup)
-  Future<void> initializeMultiAccount() async {
-    try {
-      // Clean up any expired tokens
-      await cleanupExpiredTokens();
-
-      // If user is currently signed in, sync their data
-      if (isUserSignedIn()) {
-        await _multiAccountManager.syncCurrentUserData();
-      }
-    } catch (e) {
-      print(
-          'Warning: Failed to initialize multi-account functionality: ${e.toString()}');
-    }
-  }
-
-  // Get account switch history (sorted by last used)
-  Future<List<StoredAccount>> getAccountHistory() async {
-    return await _multiAccountManager.getAllAccounts();
-  }
-
-  // Quick switch to most recently used account (excluding current)
-  Future<AccountSwitchResponse?> switchToLastUsedAccount() async {
-    try {
-      final accounts = await getAccountHistory();
-      final currentUid = currentUser?.uid;
-
-      // Find the first account that's not the current user
-      for (final account in accounts) {
-        if (account.uid != currentUid) {
-          return await switchToAccount(account.uid);
-        }
-      }
-
-      return null; // No other accounts found
-    } catch (e) {
-      return AccountSwitchResponse(
-        result: AccountSwitchResult.unknownError,
-        message: 'Failed to switch to last used account: ${e.toString()}',
-      );
-    }
   }
 }
