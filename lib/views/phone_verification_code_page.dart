@@ -10,14 +10,11 @@ import '../services/auth_service.dart';
 class PhoneVerificationCodePage extends StatefulWidget {
   final String verificationId;
   final String phoneNumber;
-  final bool
-      isSignIn; // true for sign in, false for linking to existing account
 
   const PhoneVerificationCodePage({
     super.key,
     required this.verificationId,
     required this.phoneNumber,
-    this.isSignIn = true,
   });
 
   @override
@@ -112,23 +109,16 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     });
 
     try {
-      final credential = await _authService.verifyPhoneWithCode(
-        verificationId: widget.verificationId,
-        smsCode: code,
-      );
+      final credential = await _authService.signInWithPhoneCredential(
+          verificationId: widget.verificationId, smsCode: code);
 
       if (credential != null && mounted) {
         setState(() {
           _isVerifying = false;
         });
 
-        if (widget.isSignIn) {
-          _showSuccessDialog('Phone Sign In Successful',
-              'You have successfully signed in with your phone number.');
-        } else {
-          _showSuccessDialog('Phone Number Linked',
-              'Your phone number has been successfully linked to your account.');
-        }
+        _showSuccessDialog('Phone Sign In Successful',
+            'You have successfully signed in with your phone number.');
       }
     } catch (e) {
       if (mounted) {
@@ -151,21 +141,14 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
     });
 
     try {
-      await _authService.verifyPhoneNumber(
+      await _authService.signInWithPhone(
         phoneNumber: widget.phoneNumber,
         verificationCompleted: (credential) async {
-          // Auto-verification completed
           try {
-            if (widget.isSignIn) {
-              await _authService.signInWithPhoneCredential(
-                verificationId: widget.verificationId,
-                smsCode: '',
-              );
-            }
-            if (mounted) {
-              _showSuccessDialog(
-                  'Auto Verification', 'Phone number verified automatically.');
-            }
+            await _authService.signInWithPhoneCredential(
+              verificationId: widget.verificationId,
+              smsCode: '',
+            );
           } catch (e) {
             if (mounted) {
               SnackBarHelper.error(context, e.toString());
@@ -191,7 +174,6 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
                 arguments: {
                   'verificationId': verificationId,
                   'phoneNumber': widget.phoneNumber,
-                  'isSignIn': widget.isSignIn,
                 });
             SnackBarHelper.success(context, 'New verification code sent!');
           }
@@ -275,9 +257,9 @@ class _PhoneVerificationCodePageState extends State<PhoneVerificationCodePage> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          widget.isSignIn ? 'Phone Sign In' : 'Link Phone Number',
-          style: const TextStyle(
+        title: const Text(
+          'Phone Sign In',
+          style: TextStyle(
             color: Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,

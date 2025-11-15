@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../widgets/snack_bar_helper.dart';
@@ -6,12 +7,8 @@ import '../widgets/auth_field.dart';
 import '../services/auth_service.dart';
 
 class PhoneVerificationPage extends StatefulWidget {
-  final bool
-      isSignIn; // true for sign in, false for linking to existing account
-
   const PhoneVerificationPage({
     super.key,
-    this.isSignIn = true,
   });
 
   @override
@@ -19,7 +16,7 @@ class PhoneVerificationPage extends StatefulWidget {
 }
 
 class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
-  final _authService = AuthService(); // Initialize AuthService
+  final _authService = AuthService();
   final TextEditingController _phoneController = TextEditingController();
 
   String _selectedCountryCode = '+1';
@@ -48,7 +45,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
 
   bool _isValidPhoneNumber(String phone) {
     String digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
-    return digitsOnly.length >= 10;
+    return digitsOnly.length >= 11;
   }
 
   void _onPhoneChanged(String value) {
@@ -70,68 +67,32 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
     });
 
     String fullPhoneNumber = _getFullPhoneNumber();
-
     try {
-      await _authService.verifyPhoneNumber(
-        phoneNumber: fullPhoneNumber,
-        verificationCompleted: (credential) async {
-          // Auto-verification completed (Android only)
-          try {
-            if (widget.isSignIn) {
-              await _authService.signInWithPhoneCredential(
-                verificationId: '',
-                smsCode: '',
-              );
-            }
-            if (mounted) {
-              setState(() {
-                _isSendingCode = false;
-              });
-              SnackBarHelper.success(
-                  context, 'Phone number verified automatically!');
-              Navigator.of(context).pop();
-            }
-          } catch (e) {
-            if (mounted) {
-              setState(() {
-                _isSendingCode = false;
-              });
-              SnackBarHelper.error(context, e.toString());
-            }
-          }
-        },
-        verificationFailed: (e) {
-          if (mounted) {
-            setState(() {
-              _isSendingCode = false;
-            });
-            SnackBarHelper.error(
-                context, e.message ?? 'Phone verification failed');
-          }
-        },
-        codeSent: (verificationId, resendToken) {
-          if (mounted) {
-            setState(() {
-              _isSendingCode = false;
-              _verificationId = verificationId;
-            });
+      _authService.signInWithPhone(
+          phoneNumber: fullPhoneNumber,
+          verificationCompleted: (PhoneAuthCredential credential) {},
+          verificationFailed: (FirebaseAuthException e) {},
+          codeSent: (String verificationId, int? resendToken) {
             _showCodeSentDialog();
-          }
-        },
-        codeAutoRetrievalTimeout: (verificationId) {
-          if (mounted) {
-            setState(() {
-              _verificationId = verificationId;
-            });
-          }
-        },
-      );
+            if (mounted) {
+              setState(() {
+                _isSendingCode = false;
+                _verificationId = verificationId;
+              });
+            }
+          },
+          codeAutoRetrievalTimeout: (String verificationId) {
+            if (mounted) {
+              setState(() {
+                _verificationId = verificationId;
+              });
+            }
+          });
     } catch (e) {
       if (mounted) {
         setState(() {
           _isSendingCode = false;
         });
-        //_showSnackBar(e.toString(), Colors.red);
         SnackBarHelper.error(context, e.toString());
       }
     }
@@ -150,9 +111,9 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(
-          widget.isSignIn ? 'Phone Sign In' : 'Link Phone Number',
-          style: const TextStyle(
+        title: const Text(
+          'Phone Sign In',
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Color(0xFF2D3748),
@@ -185,11 +146,9 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
               const SizedBox(height: 32),
 
               // Description Text
-              Text(
-                widget.isSignIn
-                    ? 'Enter your phone number to sign in with SMS verification'
-                    : 'Enter your phone number to link it to your account',
-                style: const TextStyle(
+              const Text(
+                'Enter your phone number to sign in with SMS verification',
+                style: TextStyle(
                   fontSize: 16,
                   color: Color(0xFF6B7280),
                   height: 1.5,
@@ -269,7 +228,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
 
               const SizedBox(height: 32),
 
-// Send Code Button
+              // Send Code Button
               GradientButton(
                 label: _isSendingCode ? 'Sending Code...' : 'Send Code',
                 onTap: (_isPhoneValid && !_isSendingCode)
@@ -440,40 +399,21 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if (_verificationId != null) {
-                      Navigator.pushNamed(context, '/phone-verification-code',
-                          arguments: {
-                            'verificationId': _verificationId!,
-                            'phoneNumber': _getFullPhoneNumber(),
-                            'isSignIn': widget.isSignIn,
-                          });
-                    } else {
-                      SnackBarHelper.error(context,
-                          'Verification ID not available. Please try again.');
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B68EE),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+              GradientButton(
+                label: 'Continue',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  if (_verificationId != null) {
+                    Navigator.pushNamed(context, '/phone-verification-code',
+                        arguments: {
+                          'verificationId': _verificationId!,
+                          'phoneNumber': _getFullPhoneNumber(),
+                        });
+                  } else {
+                    SnackBarHelper.error(context,
+                        'Verification ID not available. Please try again.');
+                  }
+                },
               ),
             ],
           ),
@@ -496,12 +436,12 @@ class _PhoneNumberFormatter extends TextInputFormatter {
       formatted = digitsOnly;
     } else if (digitsOnly.length <= 6) {
       formatted = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
-    } else if (digitsOnly.length <= 10) {
+    } else if (digitsOnly.length <= 11) {
       formatted =
           '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}';
     } else {
       formatted =
-          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 10)}';
+          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 11)}';
     }
 
     return TextEditingValue(
