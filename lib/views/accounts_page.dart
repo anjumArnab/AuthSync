@@ -1,7 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:authsync/models/account_switching_response..dart';
-
 import '../models/stored_account.dart';
 import '../widgets/snack_bar_helper.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +7,8 @@ import '../widgets/custom_button.dart';
 import '../widgets/account_card.dart';
 import '../services/auth_service.dart';
 import '../services/multi_account_manager.dart';
+import '../models/account_switching_response.dart';
+import '../widgets/auth_field.dart';
 
 class AccountsPage extends StatefulWidget {
   const AccountsPage({super.key});
@@ -23,6 +23,7 @@ class _AccountsPageState extends State<AccountsPage> {
   List<StoredAccount> _accounts = [];
   bool _isLoading = true;
   bool _isSwitching = false;
+  bool _isPasswordVisible = false;
 
   @override
   void initState() {
@@ -99,7 +100,6 @@ class _AccountsPageState extends State<AccountsPage> {
   }
 
   Future<void> _switchAccount() async {
-    // Add safety checks
     if (_accounts.isEmpty) {
       _showErrorSnackBar('No accounts available');
       return;
@@ -124,31 +124,75 @@ class _AccountsPageState extends State<AccountsPage> {
     });
 
     try {
-      // Switch to the selected account directly without confirmation dialog
-      final switchResponse = await _authService.switchToAccountWithFallback(
+      // First attempt: Try switching with existing token
+      final switchResponse = await _authService.switchToAccount(
         selectedAccount.uid,
       );
 
       if (!mounted) return;
 
-      setState(() {
-        _isSwitching = false;
-      });
-
+      // Token was valid
       if (switchResponse.result == AccountSwitchResult.success) {
+        setState(() {
+          _isSwitching = false;
+        });
         _showSuccessSnackBar('Switched to ${selectedAccount.label}');
-        // Reload accounts to update active status
         await _loadAccounts();
-        // Go back to previous screen
         if (mounted) {
           Navigator.of(context).pop(true);
         }
-      } else {
-        _handleSwitchError(switchResponse);
+        return;
       }
+
+      // If token is expeired ask for password to re-authenticate
+      if (switchResponse.result == AccountSwitchResult.tokenExpired ||
+          switchResponse.result == AccountSwitchResult.tokenInvalid) {
+        // Show password dialog
+        final password = await _showPasswordDialog(selectedAccount);
+
+        if (password == null) {
+          // User cancelled
+          setState(() {
+            _isSwitching = false;
+          });
+          return;
+        }
+
+        // Re-authenticate with password
+        try {
+          final userCredential = await _authService.signInWithEmail(
+            email: selectedAccount.email,
+            password: password,
+            addToStorage: true,
+            accountLabel: selectedAccount.label,
+          );
+
+          if (userCredential != null && mounted) {
+            setState(() {
+              _isSwitching = false;
+            });
+            _showSuccessSnackBar('Switched to ${selectedAccount.label}');
+            await _loadAccounts();
+            if (mounted) {
+              Navigator.of(context).pop(true);
+            }
+          }
+        } on Exception catch (e) {
+          if (!mounted) return;
+          setState(() {
+            _isSwitching = false;
+          });
+          _showErrorSnackBar('Authentication failed: ${e.toString()}');
+        }
+        return;
+      }
+
+      setState(() {
+        _isSwitching = false;
+      });
+      _handleSwitchError(switchResponse);
     } catch (e) {
       if (!mounted) return;
-
       setState(() {
         _isSwitching = false;
       });
@@ -246,6 +290,95 @@ class _AccountsPageState extends State<AccountsPage> {
         false;
   }
 
+  Future<String?> _showPasswordDialog(StoredAccount account) async {
+    final TextEditingController passwordController = TextEditingController();
+
+    return await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text('Session Expired'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Enter password for ${account.label}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    account.email,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  AuthField(
+                    controller: passwordController,
+                    obscureText: !_isPasswordVisible,
+                    hintText: '••••••••',
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Your session expired. Please verify your password to continue.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.orange.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(null),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (passwordController.text.isNotEmpty) {
+                      Navigator.of(dialogContext).pop(passwordController.text);
+                    }
+                  },
+                  child: const Text('Confirm'),
+                )
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showSuccessSnackBar(String message) {
     if (mounted) {
       SnackBarHelper.success(context, message);
@@ -260,9 +393,6 @@ class _AccountsPageState extends State<AccountsPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'DEBUG: Building UI - accounts: ${_accounts.length}, selected: $_selectedAccountIndex, loading: $_isLoading');
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FF),
       appBar: AppBar(
@@ -306,20 +436,7 @@ class _AccountsPageState extends State<AccountsPage> {
                             separatorBuilder: (context, index) =>
                                 const SizedBox(height: 16),
                             itemBuilder: (context, index) {
-                              print(
-                                  'DEBUG: Building account card for index $index of ${_accounts.length}');
-
-                              // Safety check to prevent RangeError
-                              if (index < 0 || index >= _accounts.length) {
-                                print(
-                                    'DEBUG: Index out of range - returning empty widget');
-                                return const SizedBox.shrink();
-                              }
-
-                              // Additional null safety check
                               final account = _accounts[index];
-
-                              // Use the new AccountCard widget
                               return AccountCard(
                                 account: account,
                                 index: index,
@@ -381,17 +498,12 @@ class _AccountsPageState extends State<AccountsPage> {
 
                   // Switch Account Button
                   CustomButton(
-                    label: _isSwitching ? 'Switching...' : 'Switch Account',
-                    onPressed: _accounts.isEmpty ||
-                            _isSwitching ||
-                            _selectedAccountIndex < 0
-                        ? null
-                        : () {
-                            print(
-                                'DEBUG: Switch button pressed - accounts: ${_accounts.length}, selected: $_selectedAccountIndex');
-                            _switchAccount();
-                          },
-                  ),
+                      label: _isSwitching ? 'Switching...' : 'Switch Account',
+                      onPressed: _accounts.isEmpty ||
+                              _isSwitching ||
+                              _selectedAccountIndex < 0
+                          ? null
+                          : () => _switchAccount()),
 
                   const SizedBox(height: 20),
                 ],
