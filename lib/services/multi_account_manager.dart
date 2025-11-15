@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'account_storage_service.dart';
 import 'custom_token_service.dart';
-import '../models/account_switching_response..dart';
+import '../models/account_switching_response.dart';
 import '../models/stored_account.dart';
 
 enum AccountSwitchResult {
@@ -121,7 +121,7 @@ class MultiAccountManager {
   Future<AccountSwitchResponse> _refreshAccountToken(String uid) async {
     try {
       // First, we need to temporarily sign in to the account to get a fresh ID token
-      // This is a limitation - we need to be authenticated as the user to generate their custom token
+      // This is a limitation - needed to be authenticated as the user to generate their custom token
 
       final account = await _storageService.getAccount(uid);
       if (account == null) {
@@ -296,7 +296,7 @@ class MultiAccountManager {
       final currentUser = _auth.currentUser;
 
       for (final account in accounts) {
-        // Skip current user as they're already authenticated
+        // Skip current user as they are already authenticated
         if (currentUser?.uid == account.uid) continue;
 
         // Check if token needs refresh
@@ -308,8 +308,6 @@ class MultiAccountManager {
       print('Error refreshing account tokens: ${e.toString()}');
     }
   }
-
-  // NEW PUBLIC METHODS - Added to fix the AuthService errors
 
   // Clear active account
   Future<void> clearActiveAccount() async {
@@ -341,7 +339,7 @@ class MultiAccountManager {
     return await _storageService.getAccount(uid);
   }
 
-  // Store account directly (for advanced usage)
+  // Store account directly
   Future<void> storeAccount(StoredAccount account) async {
     await _storageService.storeAccount(account);
   }
