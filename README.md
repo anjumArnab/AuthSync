@@ -1,6 +1,6 @@
 # AuthSync
 
-A comprehensive Flutter authentication app with Firebase integration and custom multi-account switching functionality.
+A comprehensive Flutter authentication app with Firebase integration with custom multi-account switching functionality which overcomes Firebase's native single-account limitation.
 
 ## Features
 
@@ -86,8 +86,8 @@ FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
 ```
 
 3. **Service Account Key**
-- Download from Firebase Console → Project Settings → Service Accounts
-- Either place as `serviceAccountKey.json` or set in `.env`
+- Download from Firebase Console > Project Settings > Service Accounts
+- Either place as `serviceAccountKey.json` in the root for server file or set in `.env`
 
 4. **Start Server**
 ```bash
@@ -104,9 +104,12 @@ npm start
 ### Dependencies
 ```yaml
 dependencies:
-  firebase_auth: ^4.10.1
-  flutter_secure_storage: ^9.0.0
-  http: ^1.1.0
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  google_sign_in: ^7.2.0
+  flutter_facebook_auth: ^7.1.2
+  flutter_secure_storage: ^9.2.4
+  http: ^1.5.0
 ```
 
 ### Usage Example
@@ -114,7 +117,6 @@ dependencies:
 ```dart
 // Initialize
 final authService = AuthService();
-await authService.initializeMultiAccount();
 
 // Sign in and store account
 await authService.signInWithEmail(
@@ -150,4 +152,3 @@ final accounts = await authService.getAllStoredAccounts();
 | `MultiAccountManager` | Account switching logic |
 | `AccountStorageService` | Encrypted local storage |
 | `CustomTokenService` | Server communication |
-| `StoredAccount` | Account data model |
