@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'multi_account_manager.dart';
 import '../models/account_switching_response.dart';
 import '../models/stored_account.dart';
@@ -16,7 +17,7 @@ class AuthService {
   // Get multi-account manager instance
   MultiAccountManager get multiAccountManager => _multiAccountManager;
 
-  // Sign In with Email and Password (Enhanced with multi-account support)
+  // Sign In with Email and Password
   Future<UserCredential?> signInWithEmail({
     required String email,
     required String password,
@@ -38,8 +39,7 @@ class AuthService {
 
           if (!isAlreadyStored) {
             await _multiAccountManager.addCurrentAccountToStorage(
-              label: accountLabel,
-            );
+                label: accountLabel);
           } else {
             // Sync existing account data
             await _multiAccountManager.syncCurrentUserData();
@@ -52,6 +52,96 @@ class AuthService {
         }
       }
 
+      return result;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthError(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  // Sign In with Google
+  Future<UserCredential?> signInWithGoogle({
+    bool addToStorage = true,
+    String? accountLabel,
+  }) async {
+    try {
+      // Create Google Auth Provider
+      final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+
+      // Add scopes
+      googleProvider.addScope('email');
+      googleProvider.addScope('profile');
+
+      // Sign in with popup/redirect (works on web and mobile with proper setup)
+      UserCredential result = await _auth.signInWithProvider(googleProvider);
+
+      // Add to multi-account storage if requested
+      if (addToStorage && result.user != null) {
+        try {
+          final email = result.user?.email;
+          // Check if account is already stored
+          final isAlreadyStored =
+              await _multiAccountManager.isEmailAlreadyStored(email!);
+          if (!isAlreadyStored) {
+            await _multiAccountManager.addCurrentAccountToStorage(
+                label: accountLabel);
+          } else {
+            // Sync existing account data
+            await _multiAccountManager.syncCurrentUserData();
+            // Set as active account
+            await _multiAccountManager.setActiveAccount(result.user!.uid);
+          }
+        } catch (e) {
+          // Don't fail the sign-in if storage fails
+          print('Warning: Failed to add account to storage: ${e.toString()}');
+        }
+      }
+      return result;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthError(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  // Sign In with Facebook
+  Future<UserCredential?> signInWithFacebook({
+    bool addToStorage = true,
+    String? accountLabel,
+  }) async {
+    try {
+      final LoginResult loginResult = await FacebookAuth.instance.login(
+        permissions: ['email', 'public_profile'],
+      );
+      final OAuthCredential facebookAuthCredential =
+          FacebookAuthProvider.credential(
+              '${loginResult.accessToken?.tokenString}');
+
+      UserCredential result =
+          await _auth.signInWithCredential(facebookAuthCredential);
+
+      // Add to multi-account storage if requested
+      if (addToStorage && result.user != null) {
+        try {
+          final email = result.user?.email;
+          // Check if account is already stored
+          final isAlreadyStored =
+              await _multiAccountManager.isEmailAlreadyStored(email!);
+          if (!isAlreadyStored) {
+            await _multiAccountManager.addCurrentAccountToStorage(
+                label: accountLabel);
+          } else {
+            // Sync existing account data
+            await _multiAccountManager.syncCurrentUserData();
+            // Set as active account
+            await _multiAccountManager.setActiveAccount(result.user!.uid);
+          }
+        } catch (e) {
+          // Don't fail the sign-in if storage fails
+          print('Warning: Failed to add account to storage: ${e.toString()}');
+        }
+      }
       return result;
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthError(e);
@@ -433,5 +523,15 @@ class AuthService {
   // Get current user display name
   String? getCurrentUserDisplayName() {
     return _auth.currentUser?.displayName;
+  }
+
+  //Get auth provider data
+  String? getSignInProvider() {
+    final user = _auth.currentUser;
+
+    if (user == null) return null;
+    if (user.providerData.isEmpty) return null;
+
+    return user.providerData.first.providerId;
   }
 }
