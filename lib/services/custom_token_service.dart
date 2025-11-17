@@ -6,7 +6,7 @@ import '../models/user_profile_response.dart';
 
 class CustomTokenService {
   static const String _baseUrl =
-      'http://localhost:3000/api'; // for android virtual device 'http://10.0.2.2:3000/api';
+      'http://10.0.2.2:3000/api'; // for android virtual device 'http://10.0.2.2:3000/api' and for web 'http://localhost:3000/api';
   static const Duration _timeout = Duration(seconds: 30);
 
   // Generate custom token for a user
