@@ -69,6 +69,54 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
+  Future<void> _signInWithGoogle() async {
+    try {
+      final result = await _authService.signInWithGoogle();
+      if (result != null) {
+        // Show success message
+        if (mounted) {
+          SnackBarHelper.success(context,
+              'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!');
+        }
+
+        // Navigate to ProfilePage
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/profile', (Route<dynamic> route) => false);
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        SnackBarHelper.error(context, e.toString());
+      }
+    }
+  }
+
+  Future<void> _signInWithFacebook() async {
+    try {
+      final result = await _authService.signInWithFacebook();
+      if (result != null) {
+        // Show success message
+        if (mounted) {
+          SnackBarHelper.success(context,
+              'Welcome back, ${result.user?.displayName ?? result.user?.email?.split('@')[0] ?? 'User'}!');
+        }
+
+        // Navigate to ProfilePage
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+              context, '/profile', (Route<dynamic> route) => false);
+        }
+      }
+    } catch (e) {
+      // Show error message
+      if (mounted) {
+        SnackBarHelper.error(context, e.toString());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -242,7 +290,7 @@ class _SignInPageState extends State<SignInPage> {
                       icon: Icons.mail,
                       iconColor: const Color(0xFFEA4335),
                       text: 'Continue with Google',
-                      onTap: () => print('Google login tapped'),
+                      onTap: () => _signInWithGoogle(),
                     ),
 
                     const SizedBox(height: 12),
@@ -251,7 +299,7 @@ class _SignInPageState extends State<SignInPage> {
                       icon: Icons.facebook,
                       iconColor: const Color(0xFF1877F2),
                       text: 'Continue with Facebook',
-                      onTap: () => print('Facebook login tapped'),
+                      onTap: () => _signInWithFacebook(),
                     ),
 
                     const SizedBox(height: 12),
