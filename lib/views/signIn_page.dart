@@ -160,16 +160,8 @@ class _SignInPageState extends State<SignInPage> {
                     const SizedBox(height: 20),
 
                     // Email Field
-                    const Text(
-                      'Email',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF2D3748),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     AuthField(
+                      label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       hintText: 'Enter your email',
@@ -189,16 +181,8 @@ class _SignInPageState extends State<SignInPage> {
                     const SizedBox(height: 20),
 
                     // Password Field
-                    const Text(
-                      'Password',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF2D3748),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
                     AuthField(
+                      label: 'Password',
                       controller: _passwordController,
                       obscureText: !_isPasswordVisible,
                       hintText: '••••••••',
