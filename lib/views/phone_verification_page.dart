@@ -16,7 +16,7 @@ class PhoneVerificationPage extends StatefulWidget {
 }
 
 class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
-  final _authService = AuthService();
+  final AuthService _authService = AuthService();
   final TextEditingController _phoneController = TextEditingController();
 
   String _selectedCountryCode = '+1';
@@ -35,6 +35,7 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
     {'code': '+61', 'country': 'AU', 'name': 'Australia'},
     {'code': '+55', 'country': 'BR', 'name': 'Brazil'},
     {'code': '+52', 'country': 'MX', 'name': 'Mexico'},
+    {'code': '+88', 'country': 'BD', 'name': 'Bangladesh'},
   ];
 
   @override
@@ -215,7 +216,6 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(15),
-                          _PhoneNumberFormatter(),
                         ],
                         onChanged: _onPhoneChanged,
                         filled: false,
@@ -423,30 +423,3 @@ class _PhoneVerificationPageState extends State<PhoneVerificationPage> {
   }
 }
 
-class _PhoneNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    String digitsOnly = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
-
-    String formatted = '';
-    if (digitsOnly.length <= 3) {
-      formatted = digitsOnly;
-    } else if (digitsOnly.length <= 6) {
-      formatted = '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3)}';
-    } else if (digitsOnly.length <= 11) {
-      formatted =
-          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}';
-    } else {
-      formatted =
-          '(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6, 11)}';
-    }
-
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}
