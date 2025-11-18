@@ -73,7 +73,7 @@ class AuthService {
       googleProvider.addScope('email');
       googleProvider.addScope('profile');
 
-      // Sign in with popup/redirect (works on web and mobile with proper setup)
+      // Sign in with popup/redirect
       UserCredential result = await _auth.signInWithProvider(googleProvider);
 
       // Add to multi-account storage if requested
