@@ -74,109 +74,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     }
   }
 
-  void _deleteAccount() {
-    if (!_isDeleteButtonEnabled || _isLoading) return;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.warning, color: Colors.red, size: 24),
-              SizedBox(width: 8),
-              Text(
-                'Confirm Account Deletion',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Are you absolutely sure you want to delete your account?',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                '• All your data will be permanently removed\n• This action cannot be undone\n• You will be immediately signed out',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withOpacity(0.3)),
-                ),
-                child: const Text(
-                  '⚠️ WARNING: This action is irreversible!',
-                  style: TextStyle(
-                    color: Colors.red,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      Navigator.of(context).pop();
-                      _performAccountDeletion();
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Delete Forever',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _cancel() {
     if (!_isLoading) {
       Navigator.of(context).pop();
@@ -221,7 +118,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 minHeight: MediaQuery.of(context).size.height -
                     MediaQuery.of(context).padding.top -
                     kToolbarHeight -
-                    48, // Account for padding and app bar
+                    48, // For padding and app bar
               ),
               child: IntrinsicHeight(
                 child: Column(
@@ -278,8 +175,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
                     const SizedBox(height: 8),
                     AuthField(
-                      controller: _deleteController,
                       label: "Type DELETE",
+                      controller: _deleteController,
                       hintText: "Type DELETE to confirm",
                       obscureText: false,
                       validator: (value) {
@@ -327,35 +224,13 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                       child: SizedBox(height: 24),
                     ),
 
-                    // Loading indicator
-                    if (_isLoading) ...[
-                      const Center(
-                        child: Column(
-                          children: [
-                            CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.red),
-                            ),
-                            SizedBox(height: 16),
-                            Text(
-                              'Deleting account...',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
-
                     // Delete My Account button
                     CustomButton(
                       label: _isLoading
                           ? 'Deleting Account...'
                           : 'Delete My Account',
-                      onPressed: _isLoading ? null : _deleteAccount,
+                      onPressed: () =>
+                          _isLoading ? null : _performAccountDeletion(),
                       backgroundColor: Colors.red,
                       isEnabled: _isDeleteButtonEnabled && !_isLoading,
                     ),
