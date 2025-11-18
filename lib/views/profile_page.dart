@@ -175,12 +175,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   constraints: BoxConstraints(
                     minHeight: MediaQuery.of(context).size.height -
                         MediaQuery.of(context).padding.top -
-                        40, // Account for padding
+                        40, // For padding
                   ),
                   child: IntrinsicHeight(
                     child: Column(
                       children: [
-                        // Header with title (centered)
+                        // Header with title
                         const Text(
                           'Profile',
                           style: TextStyle(
