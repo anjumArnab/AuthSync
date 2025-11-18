@@ -15,7 +15,7 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
   final _formKey = GlobalKey<FormState>();
   final _newEmailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _authService = AuthService();
+  final AuthService _authService = AuthService();
 
   String? currentEmail;
   bool _passwordVisible = false;
@@ -45,10 +45,6 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
     // Check if new email is different from current email
     if (_newEmailController.text.trim().toLowerCase() ==
         (currentEmail?.toLowerCase() ?? '')) {
-      /* _showSnackBar(
-        'New email must be different from current email',
-        Colors.orange,
-      );*/
       SnackBarHelper.warning(
           context, 'New email must be different from current email');
       return;
@@ -180,8 +176,8 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
 
               // New Email
               AuthField(
-                controller: _newEmailController,
                 label: "New Email",
+                controller: _newEmailController,
                 hintText: "Enter your new email address",
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
@@ -199,8 +195,8 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
 
               // Confirm Password
               AuthField(
-                controller: _passwordController,
                 label: "Password",
+                controller: _passwordController,
                 hintText: "Enter your current password",
                 obscureText: !_passwordVisible,
                 keyboardType: TextInputType.visiblePassword,
@@ -229,7 +225,6 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
               const SizedBox(height: 24),
 
               // Information Banner
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -239,11 +234,13 @@ class _UpdateEmailPageState extends State<UpdateEmailPage> {
                     color: Colors.blue.shade700,
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    'We\'ll send a verification link to your new email address.\n You may need to sign in again after verification.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.blue.shade700,
+                  Expanded(
+                    child: Text(
+                      'We\'ll send a verification link to your new email address. You may need to sign in again after verification.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue.shade700,
+                      ),
                     ),
                   ),
                 ],
