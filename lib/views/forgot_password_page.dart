@@ -1,5 +1,5 @@
+import 'package:authsync/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/gradient_button.dart';
 import '../widgets/auth_field.dart';
 import '../widgets/custom_button.dart';
@@ -14,6 +14,8 @@ class ForgotPasswordPage extends StatefulWidget {
 
 class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController _emailController = TextEditingController();
+
+  final AuthService _authService = AuthService(); // Initialize AuthService
 
   bool _isEmailValid = false;
   bool _isLoading = false;
@@ -65,33 +67,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     });
 
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(
+      await _authService.sendPasswordResetEmail(
         email: _emailController.text.trim(),
       );
 
-      _showResetLinkSentDialog();
-    } catch (e) {
-      String errorMessage = 'An error occurred. Please try again.';
-
-      if (e is FirebaseAuthException) {
-        switch (e.code) {
-          case 'user-not-found':
-            errorMessage = 'No user found with this email address.';
-            break;
-          case 'invalid-email':
-            errorMessage = 'Please enter a valid email address.';
-            break;
-          case 'too-many-requests':
-            errorMessage = 'Too many requests. Please try again later.';
-            break;
-        }
+      // Show a success snackbar instead of a dialog
+      if (mounted) {
+        _showResetLinkSentDialog();
       }
-
-      SnackBarHelper.error(context, errorMessage);
+    } catch (e) {
+      // Show an error snackbar if sending fails
+      if (mounted) {
+        SnackBarHelper.error(
+          context,
+          'Failed to send reset email: $e',
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -268,8 +265,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               CustomButton(
                 label: 'Got it',
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close dialog
-                  Navigator.of(context).pop(); // Go back to previous page
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
               )
             ],
