@@ -88,7 +88,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
       if (mounted) {
         // Show success message
-
         SnackBarHelper.success(context, 'Password updated successfully!');
 
         // Navigate back after successful update
@@ -169,16 +168,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               // Current Password
-              const Text(
-                'Current Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
               AuthField(
+                label: 'Current Password',
                 controller: _currentPasswordController,
                 obscureText: !_isCurrentPasswordVisible,
                 hintText: '••••••••',
@@ -208,16 +199,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               // New Password
-              const Text(
-                'New Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
               AuthField(
+                label: 'New Password',
                 controller: _newPasswordController,
                 obscureText: !_isNewPasswordVisible,
                 hintText: '••••••••',
@@ -251,16 +234,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
               const SizedBox(height: 24),
 
               // Confirm New Password
-              const Text(
-                'Confirm New Password',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
               AuthField(
+                label: 'Confirm New Password',
                 controller: _confirmPasswordController,
                 obscureText: !_isConfirmPasswordVisible,
                 hintText: '••••••••',
