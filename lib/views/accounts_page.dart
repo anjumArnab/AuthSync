@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:flutter/material.dart';
 import '../models/stored_account.dart';
 import '../widgets/snack_bar_helper.dart';
-import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/account_card.dart';
 import '../services/auth_service.dart';
@@ -44,7 +44,6 @@ class _AccountsPageState extends State<AccountsPage> {
       // Ensure list is valid
       final validAccounts = accounts.toList();
 
-      // Use mounted check before setState to prevent calling setState on disposed widget
       if (!mounted) return;
 
       setState(() {
@@ -459,7 +458,7 @@ class _AccountsPageState extends State<AccountsPage> {
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(30),
                         border: Border.all(
                           color: Colors.grey.shade300,
                           style: BorderStyle.solid,
